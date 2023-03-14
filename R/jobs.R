@@ -33,7 +33,7 @@ rm(list = ls())
 # SET WORK SPACE
 ##################################################
 FolderRoot = "~/Clusters-Chains-HPML"
-FolderScripts = "~/Clusters-Chains-HPML"
+FolderScripts = "~/Clusters-Chains-HPML/R"
 
 ##################################################
 # PACKAGES
@@ -73,7 +73,7 @@ Dendrogram.2 = c("w", "s")
 ######################################################
 # CRITERIA USED TO CHOOSE THE BEST HYBRID PARTITION
 ######################################################
-Criteria.1 = c("silho","maf1", "mif1")
+Criteria.1 = c("silho", "maf1", "mif1")
 Criteria.2 = c("s", "ma", "mi")
 
 
@@ -81,8 +81,7 @@ Criteria.2 = c("s", "ma", "mi")
 FolderJobs = paste(FolderRoot, "/jobs", sep="")
 if(dir.exists(FolderJobs)==FALSE){dir.create(FolderJobs)}
 
-FolderCF = paste(FolderRoot, "/config-files", sep="")
-if(dir.exists(FolderCF)==FALSE){dir.create(FolderCF)}
+FolderCF = "/Clusters-Chains-HPML/config-files-1"
 
 
 # IMPLEMENTAÇÃO
@@ -122,6 +121,7 @@ while(p<=length(Implementation.1)){
         FolderC = paste(FolderD, "/", Criteria.1[w], sep="")
         
         # DATASET
+        a = 1
         d = 1
         while(d<=nrow(datasets)){
           
@@ -134,7 +134,7 @@ while(p<=length(Implementation.1)){
           cat("\n\t", Criteria.1[w])
           cat("\n\t", ds$Name)
           
-          name = paste("t", 
+          name = paste("cc", 
                        Implementation.2[p], "", 
                        Similarity.2[s], "", 
                        Dendrogram.2[f], "", 
@@ -142,7 +142,7 @@ while(p<=length(Implementation.1)){
                        ds$Name, sep="")  
           
           # directory name - "/scratch/eg-3s-bbc1000"
-          scratch.name = paste("/scratch/", name, sep = "")
+          scratch.name = paste("/tmp/", name, sep = "")
           
           # Confi File Name - "eg-3s-bbc1000.csv"
           config.file.name = paste(name, ".csv", sep="")
@@ -223,7 +223,8 @@ while(p<=length(Implementation.1)){
           write("", file = output.file, append = TRUE)
           write("echo =============================================================", 
                 file = output.file, append = TRUE)
-          str.5 = paste("echo SBATCH: RUNNING TBHP FOR ", ds$Name, sep="")
+          str.5 = paste("echo SBATCH: RUNNING CLUSTERS CHAINS HPML FOR ", 
+                        ds$Name, sep="")
           write(str.5, file = output.file, append = TRUE)
           write("echo =============================================================", 
                 file = output.file, append = TRUE)
@@ -240,10 +241,12 @@ while(p<=length(Implementation.1)){
           str.7 = paste("mkdir ", scratch.name, sep = "")
           write(str.7, file = output.file, append = TRUE)
           
+          
           write("", file = output.file, append = TRUE)
           write("echo LISTING SCRATCH", file = output.file, append = TRUE)
-          write("cd /scratch", file = output.file, append = TRUE)
+          write("cd /tmp", file = output.file, append = TRUE)
           write("ls ", file = output.file, append = TRUE)
+          
           
           write("", file = output.file, append = TRUE)
           write("echo entrando na pasta", file = output.file, append = TRUE)
@@ -258,9 +261,9 @@ while(p<=length(Implementation.1)){
           
           write("", file = output.file, append = TRUE)
           write("echo COPYING SINGULARITY", file = output.file, append = TRUE)
-          str.30 = paste("cp /home/u704616/Experimentos.sif ", scratch.name, sep ="")
+          str.30 = paste("cp /home/u704616/Experimentos-0.sif ", scratch.name, sep ="")
           write(str.30 , file = output.file, append = TRUE)
-     
+          
           
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO TESTED", file = output.file, append = TRUE)
@@ -273,10 +276,12 @@ while(p<=length(Implementation.1)){
           str.28 = paste("mkdir ", scratch.name, "/Datasets", sep="")
           write(str.28, file = output.file, append = TRUE)
           
+          
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO PARTITIONS", file = output.file, append = TRUE)
           str.27 = paste("mkdir ", scratch.name, "/Partitions", sep="")
           write(str.27, file = output.file, append = TRUE)
+          
           
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO pasta", file = output.file, append = TRUE)
@@ -284,11 +289,13 @@ while(p<=length(Implementation.1)){
                          ds$Name, sep="")
           write(str.26, file = output.file, append = TRUE)
           
+          
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO pasta", file = output.file, append = TRUE)
           str.25 = paste("mkdir ", scratch.name, "/Datasets/", 
                          ds$Name, "/LabelSpace", sep="")
           write(str.25, file = output.file, append = TRUE)
+          
           
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO pasta", file = output.file, append = TRUE)
@@ -296,11 +303,13 @@ while(p<=length(Implementation.1)){
                          ds$Name, "/NamesLabels", sep="")
           write(str.24, file = output.file, append = TRUE)
           
+          
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO pasta", file = output.file, append = TRUE)
           str.23 = paste("mkdir ", scratch.name, "/Datasets/", 
                          ds$Name, "/CrosValidation", sep="")
           write(str.23, file = output.file, append = TRUE)
+          
           
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO pasta", file = output.file, append = TRUE)
@@ -308,11 +317,13 @@ while(p<=length(Implementation.1)){
                          ds$Name, "/CrosValidation/Tr", sep="")
           write(str.21, file = output.file, append = TRUE)
           
+          
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO pasta", file = output.file, append = TRUE)
           str.20 = paste("mkdir ",scratch.name, "/Datasets/", 
                          ds$Name, "/CrosValidation/Ts", sep="")
           write(str.20, file = output.file, append = TRUE)
+          
           
           write("", file = output.file, append = TRUE)
           write("echo CRIANDO pasta", file = output.file, append = TRUE)
@@ -322,15 +333,16 @@ while(p<=length(Implementation.1)){
           
           
           write(" ", file = output.file, append = TRUE)
-          write("echo SETANDO RCLONE", file = output.file, append = TRUE)
+          write("echo INICIANDO INSTANCIA", file = output.file, append = TRUE)
           str = paste("singularity instance start --bind ~/.config/rclone/:/root/.config/rclone ", 
-                      scratch.name, "/Experimentos.sif EXP", sep="")
+                      scratch.name, "/Experimentos-0.sif EXPCC", a, sep="")
           write(str, file = output.file, append = TRUE)
           
           
           write(" ", file = output.file, append = TRUE)
           write("echo EXECUTANDO", file = output.file, append = TRUE)
-          str = paste("singularity run --app Rscript instance://EXP /Clusters-Chains-HPML/R/tbhp.R \"/Clusters-Chains-HPML/config-files/",
+          str = paste("singularity run --app Rscript instance://EXPCC",
+                      a, " /Clusters-Chains-HPML/R/start.R \"/Clusters-Chains-HPML/config-files-1/",
                       Implementation.1[p], "/", Similarity.1[s], "/", 
                       Dendrogram.1[f], "/", Criteria.1[w], "/", 
                       config.file.name, "\"", sep="")
@@ -339,8 +351,8 @@ while(p<=length(Implementation.1)){
           
           write(" ", file = output.file, append = TRUE)
           write("echo STOP INSTANCIA", file = output.file, append = TRUE)
-          write("singularity instance stop EXP", 
-                file = output.file, append = TRUE)
+          str = paste("singularity instance stop EXPCC", a, sep="")
+          write(str, file = output.file, append = TRUE)
           
           
           write(" ", file = output.file, append = TRUE)
@@ -359,6 +371,7 @@ while(p<=length(Implementation.1)){
           
           close(output.file)
           
+          a = a + 1
           d = d + 1
           gc()
         } # FIM DO DATASET

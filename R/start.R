@@ -228,7 +228,7 @@ if(file.exists(str00)==FALSE){
   
 }
 
-###########################################
+
 if(parameters$Config$Implementation =="clus"){
   
   cat("\n\nRUNNING CLUS\n")  
@@ -287,18 +287,19 @@ if(parameters$Config$Implementation =="clus"){
   timeFinal <- system.time(results <- execute.run.python(parameters))
   result_set <- t(data.matrix(timeFinal))
   setwd(parameters$Folders$folderTested)
-  write.csv(result_set, "Runtime.csv")
+  write.csv(result_set, "Final-Runtime.csv")
   
   x.minutos = (1 * as.numeric(result_set[3]))/60
-  setwd(parameters$Folders$folderTested)
+  setwd(diretorios$folderLocal)
   write(x.minutos, "minutos.txt")
   
   print(system(paste("rm -r ", diretorios$folderDatasets, sep="")))
   print(system(paste("rm -r ", diretorios$folderPartitions, sep="")))
   
+  
   cat("\n\nCOPY TO GOOGLE DRIVE")
   origem = parameters$Folders$folderTested
-  destino = paste("nuvem:Clusters-Chains-HPML/",
+  destino = paste("nuvem:Clusters-Chains-HPMLs/",
                   parameters$Config$Implementation, "/", 
                   parameters$Config$Similarity, "/", 
                   parameters$Config$Dendrogram, "/", 

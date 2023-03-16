@@ -315,6 +315,35 @@ evaluate.python.silho <- function(parameters){
     setwd(Folder.Tested.Split)
     write.csv(confMatPart, namae)
     
+    
+    ###############################################################
+    conf.mat = data.frame(confmat$TPl, confmat$FPl,
+                          confmat$FNl, confmat$TNl)
+    names(conf.mat) = c("TP", "FP", "FN", "TN")
+    
+    
+    # porcentagem
+    conf.mat.perc = data.frame(conf.mat/nrow(y_true))
+    names(conf.mat.perc) = c("TP.perc", "FP.perc", "FN.perc", "TN.perc")
+    
+    # calculando o total de rótulos classificados errados
+    wrong = conf.mat$FP + conf.mat$FN
+    
+    # calculando a porcentagem de rótulos classificados errados
+    wrong.perc = wrong/nrow(y_true)
+    
+    # calculando o total de rótulos classificados corretamente
+    correct = conf.mat$TP + conf.mat$TN
+    
+    # calculando a porcentagem de rótulos classificados corretamente
+    correct.perc = correct/nrow(y_true)
+    
+    conf.mat = data.frame(conf.mat, conf.mat.perc, wrong, correct, 
+                          wrong.perc, correct.perc)
+    
+    setwd(FolderSplit)
+    write.csv(conf.mat, "utiml-matrix-confusion.csv")
+    
     #####################################################################
     cat("\nSave original and pruned predictions")
     pred.o = paste(colnames(y_pred), "-pred", sep="")

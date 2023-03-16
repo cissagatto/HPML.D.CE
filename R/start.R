@@ -290,7 +290,7 @@ if(parameters$Config$Implementation =="clus"){
   write.csv(result_set, "Final-Runtime.csv")
   
   x.minutos = (1 * as.numeric(result_set[3]))/60
-  setwd(diretorios$folderLocal)
+  setwd(parameters$Folders$folderTested)
   write(x.minutos, "minutos.txt")
   
   print(system(paste("rm -r ", diretorios$folderDatasets, sep="")))

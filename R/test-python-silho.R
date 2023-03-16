@@ -341,7 +341,7 @@ evaluate.python.silho <- function(parameters){
     conf.mat = data.frame(conf.mat, conf.mat.perc, wrong, correct, 
                           wrong.perc, correct.perc)
     
-    setwd(FolderSplit)
+    setwd(Folder.Tested.Split)
     write.csv(conf.mat, "utiml-matrix-confusion.csv")
     
     #####################################################################

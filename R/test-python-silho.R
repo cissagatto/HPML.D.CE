@@ -46,7 +46,7 @@ build.python.silho <- function(parameters){
   
   f = 1
   build.paralel.ecc <- foreach(f = 1:parameters$Config$Number.Folds) %dopar%{
-    # while(f<=parameters$Config$Number.Folds){
+  # while(f<=parameters$Config$Number.Folds){
     
     
     cat("\n\n\n#===================================================#")
@@ -146,10 +146,6 @@ build.python.silho <- function(parameters){
                         Folder.Tested.Split, 
                         sep="")
     
-    cat("\n\n")
-    print(str.execute)
-    cat("\n\n")
-    
     # EXECUTA
     res = print(system(str.execute))
     
@@ -158,7 +154,7 @@ build.python.silho <- function(parameters){
     }
     
   
-  #f = f + 1
+  # f = f + 1
   gc()
   cat("\n")
 } # fim do for each
@@ -251,9 +247,8 @@ evaluate.python.silho <- function(parameters){
                          parameters$DatasetInfo$LabelEnd, by=1)
     test.mldr = mldr_from_dataframe(test.dataset, labelIndices = labels.indices)
     
-    utiml.threshold <- scut_threshold(y_proba, test.mldr)
     y_pred <- data.frame(as.matrix(fixed_threshold(y_proba, 
-                                                   utiml.threshold)))
+                                                   threshold = 0.5)))
     
     setwd(Folder.Tested.Split)
     write.csv(y_pred, "y_pred.csv", row.names = FALSE)

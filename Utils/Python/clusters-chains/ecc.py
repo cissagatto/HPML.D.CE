@@ -79,7 +79,10 @@ class ECC:
             chainModel = self.__getModel()            
             chain_y = pd.DataFrame(y[y.columns[self.clusters[i]]])
             chainModel.labelName_ = y.columns[self.clusters[i]]
-            chainModel.fit(chain_x, chain_y)
+            if chain_y.shape[1] == 1:
+                chainModel.fit(chain_x, chain_y.values.ravel())
+            else:
+                chainModel.fit(chain_x, chain_y)
             chain_x = pd.concat([chain_x, chain_y],axis=1)
             chain.append(chainModel)
         self.chains.append(chain)
@@ -90,9 +93,16 @@ class ECC:
         chain_x = x.copy()
         predictions = pd.DataFrame([])
         for model in self.chains[chainIndex]:
-            predictionsChain = pd.DataFrame(model.predict(chain_x), columns = model.labelName_ )
-            predictions[model.labelName_] = predictionsChain
-            chain_x = pd.concat([chain_x, predictionsChain], axis=1)
+#            predictionsChain = pd.DataFrame(model.predict(chain_x), columns = model.labelName_ )
+            predChain = model.predict_proba(chain_x)
+            if type(predChain) is list:
+                predChain = np.concatenate([probs[:,1].reshape(-1,1) for probs in predChain],axis=1)
+            else:
+                predChain = predChain[:,1].reshape(-1,1)
+            predChain = pd.DataFrame(predChain, columns = model.labelName_ )
+            predictions[model.labelName_] = predChain
+
+            chain_x = pd.concat([chain_x, predChain], axis=1)
         predictions = predictions[self.orderLabelsDataset]
         return predictions      
       

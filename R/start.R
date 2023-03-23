@@ -55,7 +55,7 @@ cat("\n\nCreating a list of parameters")
 parameters = list()
 
 
-# config_file = "/home/biomal/Clusters-Chains-HPML/config-files/python/jaccard/ward.D2/silho/ccpjws-GpositiveGO.csv"
+# config_file = "/home/biomal/Clusters-Chains-HPML/config-files-laptop/python/jaccard/ward.D2/silho/cluster-GpositiveGO.csv"
 
 
 cat("\n\nGetting arguments for commnad line")

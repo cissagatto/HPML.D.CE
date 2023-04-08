@@ -400,7 +400,7 @@ evaluate.python.silho <- function(parameters){
     
     
     
-    f = f + 1
+    # f = f + 1
     gc()
   } # fim do for each
   

@@ -317,13 +317,8 @@ if(parameters$Config$Implementation =="clus"){
   setwd(parameters$Folders$folderTested)
   write.csv(result_set, "Final-Runtime.csv")
   
-  x.minutos = (1 * as.numeric(result_set[3]))/60
-  setwd(parameters$Folders$folderTested)
-  write(x.minutos, "minutos.txt")
-  
   print(system(paste("rm -r ", diretorios$folderDatasets, sep="")))
   print(system(paste("rm -r ", diretorios$folderPartitions, sep="")))
-  
   
   cat("\n\nCOPY TO GOOGLE DRIVE")
   origem = parameters$Folders$folderTested

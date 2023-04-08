@@ -351,22 +351,22 @@ evaluate.python.silho <- function(parameters){
     }
     
     ####################################################
-    names = paste(parameters$Names.Labels$Labels, "-proba", sep="")
-    y_pred_proba = data.frame(y_proba)
+    names = paste(parameters$Config$NamesLabels, "-proba", sep="")
+    y_proba = data.frame(y_proba)
     names(y_proba) = names
     rm(names)
     
-    names  = paste(parameters$Names.Labels$Labels, "-true", sep="")
+    names  = paste(parameters$Config$NamesLabels, "-true", sep="")
     true = data.frame(y_true)
     names(y_true) = names 
     rm(names)
     
-    names  = paste(parameters$Names.Labels$Labels, "-thr-05", sep="")
+    names  = paste(parameters$Config$NamesLabels, "-thr-05", sep="")
     y_threshold_05 = data.frame(y_threshold_05)
     names(y_threshold_05) = names 
     rm(names)
     
-    names  = paste(parameters$Names.Labels$Labels, "-thr-lc", sep="")
+    names  = paste(parameters$Config$NamesLabels, "-thr-lc", sep="")
     y_threshold_card = data.frame(as.matrix(y_threshold_card))
     names(y_threshold_card) = names 
     rm(names)

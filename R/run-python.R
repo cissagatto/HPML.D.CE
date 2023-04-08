@@ -1,6 +1,6 @@
+
 ##############################################################################
-# HYBRID PARTITIONS FOR MULTI-LABEL CLASSIFICATION                           #
-# CLUSTERS CHAINS HPML                                                       #
+# Clusters CHAINS HPML                                                         #
 # Copyright (C) 2023                                                         #
 #                                                                            #
 # This code is free software: you can redistribute it and/or modify it under #
@@ -11,18 +11,26 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General   #
 # Public License for more details.                                           #
 #                                                                            #
-# PhD Elaine Cecilia Gatto | Prof. Dr. Ricardo Cerri | Prof. Dr. Mauri       #
-# Ferrandin | Prof. Dr. Celine Vens | PhD Felipe Nakano Kenji                #
+# 1 - PhD Elaine Cecilia Gatto | Prof PhD Ricardo Cerri                      #
+# 2 - Prof PhD Mauri Ferrandin                                               #
+# 3 - Prof PhD Celine Vens | PhD Felipe Nakano Kenji                         #
+# 4 - Prof PhD Jesse Read                                                    #
 #                                                                            #
-# Federal University of São Carlos - UFSCar - https://www2.ufscar.br         #
-# Campus São Carlos - Computer Department - DC - https://site.dc.ufscar.br   #
+# 1 = Federal University of São Carlos - UFSCar - https://www2.ufscar.br     #
+# Campus São Carlos | Computer Department - DC - https://site.dc.ufscar.br | #
 # Post Graduate Program in Computer Science - PPGCC                          # 
-# http://ppgcc.dc.ufscar.br - Bioinformatics and Machine Learning Group      #
-# BIOMAL - http://www.biomal.ufscar.br                                       #
+# http://ppgcc.dc.ufscar.br | Bioinformatics and Machine Learning Group      #
+# BIOMAL - http://www.biomal.ufscar.br                                       # 
 #                                                                            #
-# Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium               #
+# 2 - Federal University of Santa Catarina Campus Blumenau - UFSC            #
+# https://ufsc.br/                                                           #
+#                                                                            #
+# 3 - Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium           #
 # Medicine Department - https://kulak.kuleuven.be/                           #
 # https://kulak.kuleuven.be/nl/over_kulak/faculteiten/geneeskunde            #
+#                                                                            #
+# 4 - Ecole Polytechnique | Institut Polytechnique de Paris | 1 rue Honoré   #
+# d’Estienne d’Orves - 91120 - Palaiseau - FRANCE                            #
 #                                                                            #
 ##############################################################################
 
@@ -46,9 +54,6 @@ execute.run.python <- function(parameters){
   
   setwd(FolderScripts)
   source("utils.R")
-  
-  setwd(FolderScripts)
-  source("test-python-silho.R")
   
   
   if(parameters$Config$Number.Cores == 0){
@@ -94,7 +99,6 @@ execute.run.python <- function(parameters){
   parameters$LabelSpace = resLS
   
   
-  
   cat("\n\n##################################################")
     cat("\n# RUN python: Get all partitions                 #")
     cat("\n##################################################\n\n")
@@ -104,79 +108,84 @@ execute.run.python <- function(parameters){
   
   
   if(parameters$Config$Criteria=="maf1"){
-    
-    cat("\n\n##########################################################")
-    cat("\n# RUN python MACRO-F1: Build and Test Partitions           #")
-    cat("\n##########################################################\n\n")
-    timeBuild = system.time(resBuild <- build.python.maf1(parameters))
-    
-    
-    cat("\n\n#########################################################")
-    cat("\n# RUN python MACRO-F1: Matrix Confusion                   #")
-    cat("\n#########################################################\n\n")
-    timePreds = system.time(resGather <- gather.preds.python.maf1(parameters))
-    
-    
-    cat("\n\n##########################################################")
-    cat("\n# RUN python MACRO-F1: Evaluation                          #")
-    cat("\n##########################################################\n\n")
-    timeEvaluate = system.time(resEval <- evaluate.python.maf1(parameters))
-    
-    
-    cat("\n\n##########################################################")
-    cat("\n# RUN python MACRO-F1: Mean 10 Folds                       #")
-    cat("\n##########################################################\n\n")
-    timeGather = system.time(resGE <- gather.eval.python.maf1(parameters))
-    
-    
-    cat("\n\n#########################################################")
-    cat("\n# RUN python MACRO-F1: Save Runtime                       #")
-    cat("\n#########################################################\n\n")
-    timesExecute = rbind(timeAllPartitions, timeLabelSpace, 
-                         timeBuild, timePreds,
-                         timeEvaluate, timeGather)
-    setwd(parameters$Folders$folderTested)
-    write.csv(timesExecute, "Run-Time-Maf1-python.csv")
-    
+    # 
+    # cat("\n\n##########################################################")
+    # cat("\n# RUN python MACRO-F1: Build and Test Partitions           #")
+    # cat("\n##########################################################\n\n")
+    # timeBuild = system.time(resBuild <- build.python.maf1(parameters))
+    # 
+    # 
+    # cat("\n\n#########################################################")
+    # cat("\n# RUN python MACRO-F1: Matrix Confusion                   #")
+    # cat("\n#########################################################\n\n")
+    # timePreds = system.time(resGather <- gather.preds.python.maf1(parameters))
+    # 
+    # 
+    # cat("\n\n##########################################################")
+    # cat("\n# RUN python MACRO-F1: Evaluation                          #")
+    # cat("\n##########################################################\n\n")
+    # timeEvaluate = system.time(resEval <- evaluate.python.maf1(parameters))
+    # 
+    # 
+    # cat("\n\n##########################################################")
+    # cat("\n# RUN python MACRO-F1: Mean 10 Folds                       #")
+    # cat("\n##########################################################\n\n")
+    # timeGather = system.time(resGE <- gather.eval.python.maf1(parameters))
+    # 
+    # 
+    # cat("\n\n#########################################################")
+    # cat("\n# RUN python MACRO-F1: Save Runtime                       #")
+    # cat("\n#########################################################\n\n")
+    # timesExecute = rbind(timeAllPartitions, timeLabelSpace, 
+    #                      timeBuild, timePreds,
+    #                      timeEvaluate, timeGather)
+    # setwd(parameters$Folders$folderTested)
+    # write.csv(timesExecute, "Run-Time-Maf1-python.csv")
+    # 
     
   } else if(parameters$Config$Criteria=="mif1"){
-    
-    cat("\n\n##########################################################")
-    cat("\n# RUN python MICRO-F1: Build and Test Partitions           #")
-    cat("\n##########################################################\n\n")
-    timeBuild = system.time(resBuild <- build.python.mif1(parameters))
-    
-    
-    cat("\n\n#########################################################")
-    cat("\n# RUN python MICRO-F1: Matrix Confusion                   #")
-    cat("\n#########################################################\n\n")
-    timePreds = system.time(resGather <- gather.preds.python.mif1(parameters))
-    
-    
-    cat("\n\n##########################################################")
-    cat("\n# RUN python MICRO-F1: Evaluation                          #")
-    cat("\n##########################################################\n\n")
-    timeEvaluate = system.time(resEval <- evaluate.python.mif1(parameters))
-    
-    
-    cat("\n\n##########################################################")
-    cat("\n# RUN python MICRO-F1: Mean 10 Folds                       #")
-    cat("\n##########################################################\n\n")
-    timeGather = system.time(resGE <- gather.eval.python.mif1(parameters))
-    
-    
-    cat("\n\n#########################################################")
-    cat("\n# RUN python MICRO-F1: Save Runtime                       #")
-    cat("\n#########################################################\n\n")
-    timesExecute = rbind(timeAllPartitions, timeLabelSpace, 
-                         timeBuild, timePreds,
-                         timeEvaluate, timeGather)
-    setwd(parameters$Folders$folderTested)
-    write.csv(timesExecute, "Run-Time-Mif1-python.csv")
+    # 
+    # cat("\n\n##########################################################")
+    # cat("\n# RUN python MICRO-F1: Build and Test Partitions           #")
+    # cat("\n##########################################################\n\n")
+    # timeBuild = system.time(resBuild <- build.python.mif1(parameters))
+    # 
+    # 
+    # cat("\n\n#########################################################")
+    # cat("\n# RUN python MICRO-F1: Matrix Confusion                   #")
+    # cat("\n#########################################################\n\n")
+    # timePreds = system.time(resGather <- gather.preds.python.mif1(parameters))
+    # 
+    # 
+    # cat("\n\n##########################################################")
+    # cat("\n# RUN python MICRO-F1: Evaluation                          #")
+    # cat("\n##########################################################\n\n")
+    # timeEvaluate = system.time(resEval <- evaluate.python.mif1(parameters))
+    # 
+    # 
+    # cat("\n\n##########################################################")
+    # cat("\n# RUN python MICRO-F1: Mean 10 Folds                       #")
+    # cat("\n##########################################################\n\n")
+    # timeGather = system.time(resGE <- gather.eval.python.mif1(parameters))
+    # 
+    # 
+    # cat("\n\n#########################################################")
+    # cat("\n# RUN python MICRO-F1: Save Runtime                       #")
+    # cat("\n#########################################################\n\n")
+    # timesExecute = rbind(timeAllPartitions, timeLabelSpace, 
+    #                      timeBuild, timePreds,
+    #                      timeEvaluate, timeGather)
+    # setwd(parameters$Folders$folderTested)
+    # write.csv(timesExecute, "Run-Time-Mif1-python.csv")
     
     
     
   } else {
+    
+    
+    setwd(FolderScripts)
+    source("test-python-silho.R")
+    
     
     cat("\n\n#######################################################")
       cat("\n# RUN python SILHOUETTE: Build and Test Partitions    #")

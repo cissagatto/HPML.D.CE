@@ -1,6 +1,4 @@
 ##############################################################################
-# HYBRID PARTITIONS FOR MULTI-LABEL CLASSIFICATION (HPML)                    #
-# STANDARD HPML - no chains at all                                           #
 # Copyright (C) 2023                                                         #
 #                                                                            #
 # This code is free software: you can redistribute it and/or modify it under #
@@ -11,71 +9,76 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General   #
 # Public License for more details.                                           #
 #                                                                            #
-# Elaine Cecilia Gatto | Prof. Dr. Ricardo Cerri | Prof. Dr. Mauri           #
-# Ferrandin | Prof. Dr. Celine Vens | PhD Felipe Nakano Kenji                #
+# 1 - PhD Elaine Cecilia Gatto | Prof PhD Ricardo Cerri                      #
+# 2 - Prof PhD Mauri Ferrandin                                               #
+# 3 - Prof PhD Celine Vens | PhD Felipe Nakano Kenji                         #
+# 4 - Prof PhD Jesse Read                                                    #
 #                                                                            #
-# Federal University of São Carlos - UFSCar - https://www2.ufscar.br         #
-# Campus São Carlos - Computer Department - DC - https://site.dc.ufscar.br   #
+# 1 = Federal University of São Carlos - UFSCar - https://www2.ufscar.br     #
+# Campus São Carlos | Computer Department - DC - https://site.dc.ufscar.br | #
 # Post Graduate Program in Computer Science - PPGCC                          # 
-# http://ppgcc.dc.ufscar.br - Bioinformatics and Machine Learning Group      #
-# BIOMAL - http://www.biomal.ufscar.br                                       #
+# http://ppgcc.dc.ufscar.br | Bioinformatics and Machine Learning Group      #
+# BIOMAL - http://www.biomal.ufscar.br                                       # 
 #                                                                            #
-# Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium               #
+# 2 - Federal University of Santa Catarina Campus Blumenau - UFSC            #
+# https://ufsc.br/                                                           #
+#                                                                            #
+# 3 - Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium           #
 # Medicine Department - https://kulak.kuleuven.be/                           #
 # https://kulak.kuleuven.be/nl/over_kulak/faculteiten/geneeskunde            #
+#                                                                            #
+# 4 - Ecole Polytechnique | Institut Polytechnique de Paris | 1 rue Honoré   #
+# d’Estienne d’Orves - 91120 - Palaiseau - FRANCE                            #
 #                                                                            #
 ##############################################################################
 
 
 import sys
 import pandas as pd
-from eccExin import ECCExin
-from sklearn.ensemble import RandomForestClassifier
+from ecc import ECC
+from sklearn.ensemble import RandomForestClassifier  
 from sklearn.metrics import average_precision_score
 
-if __name__ == '__main__':
-
+if __name__ == '__main__':    
+    
     n_chains = 10
     random_state = 0
     n_estimators = 200
     baseModel = RandomForestClassifier(n_estimators = n_estimators, random_state = random_state)
-    
+
     train = pd.read_csv(sys.argv[1])
     valid = pd.read_csv(sys.argv[2])
     test = pd.read_csv(sys.argv[3])
     partitions = pd.read_csv(sys.argv[4])
+    directory = sys.argv[5]
+    
     train = pd.concat([train,valid],axis=0).reset_index(drop=True)
     
+    # train = pd.read_csv("/dev/shm/ccpjws-GpositiveGO/Datasets/GpositiveGO/CrossValidation/Tr/GpositiveGO-Split-Tr-1.csv")
+    # test = pd.read_csv("/dev/shm/ccpjws-GpositiveGO/Datasets/GpositiveGO/CrossValidation/Ts/GpositiveGO-Split-Ts-1.csv")
+    # valid = pd.read_csv("/dev/shm/ccpjws-GpositiveGO/Datasets/GpositiveGO/CrossValidation/Vl/GpositiveGO-Split-Vl-1.csv")
+    # partitions = pd.read_csv("/dev/shm/ccpjws-GpositiveGO/Partitions/GpositiveGO/Split-1/Partition-2/partition-2.csv")    
+
     clusters = partitions.groupby("group")["label"].apply(list)   
     allLabels = partitions["label"].unique()
     x_train = train.drop(allLabels, axis=1)
     y_train = train[allLabels]
     x_test = test.drop(allLabels, axis=1)
 
-    ecc = ECCExin(baseModel,
+    ecc = ECC(baseModel,
             n_chains)
 
     ecc.fit(x_train,
             y_train,
-            clusters
-             )
-    
+            clusters,
+            )
+
     test_predictions = pd.DataFrame(ecc.predict(x_test))
     train_predictions = pd.DataFrame(ecc.predict(x_train))
-
-    test_predictions.to_csv("y_pred.csv", index=False)
-    test[allLabels].to_csv("y_true.csv", index=False)
-
     
-    y_true = pd.read_csv(true)
-    y_pred = pd.read_csv(pred)
-      
-    micro = average_precision_score(y_true, y_pred, average = "micro")
-    macro = average_precision_score(y_true, y_pred, average = "macro")
-      
-    y_proba = pd.DataFrame([micro,macro]).T
-    y_proba.columns = ["Micro-AUPRC", "Macro-AUPRC"]
-    name = (directory + "/y_proba_mami.csv") # salva as predições probabilísticas para 1
-    y_proba.to_csv(name, index=False)
-      
-
+    true = (directory + "/y_true.csv")
+    pred = (directory + "/y_proba.csv")    
+    
+    test_predictions.to_csv(pred, index=False)
+    test[allLabels].to_csv(true, index=False)
+    

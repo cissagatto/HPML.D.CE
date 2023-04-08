@@ -389,7 +389,7 @@ evaluate.python.silho <- function(parameters){
     
     
     #########################################################################    
-    roc.curva(f = f, y_pred = y_pred_proba, test = mldr.teste,
+    roc.curva(f = f, y_pred = y_proba, test = mldr.teste,
               Folder = Folder.Tested.Split, nome = "pred-proba")
     
     roc.curva(f = f, y_pred = y_threshold_card, test = mldr.teste,

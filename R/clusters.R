@@ -1,11 +1,11 @@
 cat("\n\n########################################################")
-cat("\n# RSCRIPT: START EXECUTE Clusters                          #")
+cat("\n# RSCRIPT: START EXECUTE CLUSTERS                        #")
 cat("\n##########################################################\n\n")
 
 
 ##############################################################################
-# Clusters CHAINS HPML                                                         #
-# Copyright (C) 2023                                                         #
+# Label Clusters Chains for Multi-Label Classification                       #
+# Copyright (C) 2025                                                         #
 #                                                                            #
 # This code is free software: you can redistribute it and/or modify it under #
 # the terms of the GNU General Public License as published by the Free       #
@@ -15,36 +15,43 @@ cat("\n##########################################################\n\n")
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General   #
 # Public License for more details.                                           #
 #                                                                            #
-# 1 - PhD Elaine Cecilia Gatto | Prof PhD Ricardo Cerri                      #
-# 2 - Prof PhD Mauri Ferrandin                                               #
-# 3 - Prof PhD Celine Vens | PhD Felipe Nakano Kenji                         #
-# 4 - Prof PhD Jesse Read                                                    #
+# 1 - Prof Elaine Cecilia Gatto                                              #
+# 2 - Prof PhD Ricardo Cerri                                                 #
+# 3 - Prof PhD Mauri Ferrandin                                               #
+# 4 - Prof PhD Celine Vens                                                   #
+# 5 - PhD Felipe Nakano Kenji                                                #
+# 6 - Prof PhD Jesse Read                                                    #
 #                                                                            #
 # 1 = Federal University of São Carlos - UFSCar - https://www2.ufscar.br     #
 # Campus São Carlos | Computer Department - DC - https://site.dc.ufscar.br | #
 # Post Graduate Program in Computer Science - PPGCC                          # 
 # http://ppgcc.dc.ufscar.br | Bioinformatics and Machine Learning Group      #
 # BIOMAL - http://www.biomal.ufscar.br                                       # 
-#                                                                            #
-# 2 - Federal University of Santa Catarina Campus Blumenau - UFSC            #
+#                                                                            # 
+# 1 = Federal University of Lavras - UFLA                                    #
+#                                                                            # 
+# 2 = State University of São Paulo - USP                                    #
+#                                                                            # 
+# 3 - Federal University of Santa Catarina Campus Blumenau - UFSC            #
 # https://ufsc.br/                                                           #
 #                                                                            #
-# 3 - Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium           #
+# 4 and 5 - Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium     #
 # Medicine Department - https://kulak.kuleuven.be/                           #
 # https://kulak.kuleuven.be/nl/over_kulak/faculteiten/geneeskunde            #
 #                                                                            #
-# 4 - Ecole Polytechnique | Institut Polytechnique de Paris | 1 rue Honoré   #
+# 6 - Ecole Polytechnique | Institut Polytechnique de Paris | 1 rue Honoré   #
 # d’Estienne d’Orves - 91120 - Palaiseau - FRANCE                            #
 #                                                                            #
 ##############################################################################
 
 
+# getwd()
 
 cat("\n################################")
 cat("\n# Set Work Space               #")
 cat("\n###############################\n\n")
-FolderRoot = "~/Clusters-Chains-HPML"
-FolderScripts = "~/Clusters-Chains-HPML/R"
+FolderRoot = "~/HPML.D.CE"
+FolderScripts = "~/HPML.D.CE/R"
 
 
 cat("\n########################################")
@@ -84,11 +91,9 @@ cat("\n# GET ARGUMENTS FROM COMMAND LINE   #")
 cat("\n#####################################\n\n")
 args <- commandArgs(TRUE)
 
-
 config_file <- args[1]
 
-
-# config_file = "/home/biomal/Clusters-Chains-HPML/config-files-laptop/python/jaccard/ward.D2/silho/cluster-GpositiveGO.csv"
+# config_file = "~/HPML.D.CE/config-files/cluster-emotions.csv"
 
 
 if(file.exists(config_file)==FALSE){
@@ -165,6 +170,8 @@ cat("\n\nChecking the dataset tar.gz file")
 str00 = paste(dataset_path, "/", ds$Name,".tar.gz", sep = "")
 str00 = str_remove(str00, pattern = " ")
 
+# str00 = "~/HPML.D.CE/Datasets/emotions.tar.gz"
+
 if(file.exists(str00)==FALSE){
   
   cat("\n######################################################################")
@@ -212,6 +219,8 @@ if(file.exists(str00)==FALSE){
 cat("\n\nChecking the BEST HYBRID PARTITIONS tar.gz file")
 str00 = paste(Partitions_Path, "/", ds$Name,".tar.gz", sep = "")
 str00 = str_remove(str00, pattern = " ")
+
+# str00 = "~/HPML.D.CE/Best-Partitions/jaccard/ward.D2/silho/emotions.tar.gz"
 
 if(file.exists(str00)==FALSE){
   
@@ -317,27 +326,54 @@ if(parameters$Config$Implementation =="clus"){
   setwd(parameters$Folders$folderTested)
   write.csv(result_set, "Final-Runtime.csv")
   
-  print(system(paste("rm -r ", diretorios$folderDatasets, sep="")))
-  print(system(paste("rm -r ", diretorios$folderPartitions, sep="")))
+  cat("\n\nCOMPRESS AND COPY TO RESULTS FOLDER\n")
   
-  cat("\n\nCOPY TO GOOGLE DRIVE")
-  origem = parameters$Folders$folderTested
-  destino = paste("nuvem:Clusters-Chains-HPMLs/",
-                  parameters$Config$Implementation, "/", 
-                  parameters$Config$Similarity, "/", 
-                  parameters$Config$Dendrogram, "/", 
-                  parameters$Config$Criteria, "/", 
-                  parameters$Config$Dataset.Name, sep="")
-  comando1 = paste("rclone -P copy ", origem, " ", destino, sep="")
-  cat("\n", comando1, "\n")
-  a = print(system(comando1))
-  a = as.numeric(a)
-  if(a != 0) {
-    stop("Erro RCLONE")
+  # Pastas
+  origem  <- parameters$Folders$folderTested
+  destino <- "~/HPML.D.CE/Results/"
+  
+  # Nome do dataset (vai ser o nome do arquivo)
+  nome_dataset <- parameters$DatasetInfo$Name
+  nome_arquivo <- paste0(nome_dataset, ".tar.gz")
+  arquivo_comprimido <- file.path(dirname(origem), nome_arquivo)
+  
+  # Comprime o conteúdo da pasta, sem incluir o nome da pasta tested
+  comando_comprimir <- paste("tar -czf", arquivo_comprimido, "-C", origem, ".")
+  cat("Comprimindo:", comando_comprimir, "\n")
+  res_comprimir <- system(comando_comprimir)
+  
+  if (res_comprimir != 0) {
+    stop("Erro ao comprimir")
     quit("yes")
   }
   
+  # Copia o arquivo comprimido
+  comando_copiar <- paste("cp", arquivo_comprimido, destino)
+  cat("Copiando:", comando_copiar, "\n")
+  res_copiar <- system(comando_copiar)
   
+  if (res_copiar != 0) {
+    stop("Erro ao copiar")
+    quit("yes")
+  }
+  
+  cat("Arquivo comprimido e copiado com sucesso!\n")
+  
+  # destino = paste("nuvem:Clusters-Chains-HPMLs/",
+  #                 parameters$Config$Implementation, "/", 
+  #                 parameters$Config$Similarity, "/", 
+  #                 parameters$Config$Dendrogram, "/", 
+  #                 parameters$Config$Criteria, "/", 
+  #                 parameters$Config$Dataset.Name, sep="")
+  # comando1 = paste("rclone -P copy ", origem, " ", destino, sep="")
+  # cat("\n", comando1, "\n")
+  # a = print(system(comando1))
+  # a = as.numeric(a)
+  # if(a != 0) {
+  #   stop("Erro RCLONE")
+  #   quit("yes")
+  # }
+  # 
   
 } else if(parameters$Config$Implementation=="mulan"){
   
@@ -354,12 +390,10 @@ if(parameters$Config$Implementation =="clus"){
 cat("\n####################################################################")
 cat("\n# DELETE                                                           #")
 cat("\n####################################################################\n\n")
-str_c = paste("rm -r ", diretorios$folderResults, sep="")
-print(system(str_c))
-
+print(system(paste0("rm -r ", parameters$Config$Folder.Results)))
 rm(list = ls())
-gc()
 
+gc()
 
 cat("\n\n############################################################")
   cat("\n# END TEST BEST HYBRID PARTITION                           #")

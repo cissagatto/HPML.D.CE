@@ -1,6 +1,6 @@
 ##############################################################################
-# Clusters CHAINS HPML                                                         #
-# Copyright (C) 2023                                                         #
+# Label Clusters Chains for Multi-Label Classification                       #
+# Copyright (C) 2025                                                         #
 #                                                                            #
 # This code is free software: you can redistribute it and/or modify it under #
 # the terms of the GNU General Public License as published by the Free       #
@@ -10,33 +10,41 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General   #
 # Public License for more details.                                           #
 #                                                                            #
-# 1 - PhD Elaine Cecilia Gatto | Prof PhD Ricardo Cerri                      #
-# 2 - Prof PhD Mauri Ferrandin                                               #
-# 3 - Prof PhD Celine Vens | PhD Felipe Nakano Kenji                         #
-# 4 - Prof PhD Jesse Read                                                    #
+# 1 - Prof Elaine Cecilia Gatto                                              #
+# 2 - Prof PhD Ricardo Cerri                                                 #
+# 3 - Prof PhD Mauri Ferrandin                                               #
+# 4 - Prof PhD Celine Vens                                                   #
+# 5 - PhD Felipe Nakano Kenji                                                #
+# 6 - Prof PhD Jesse Read                                                    #
 #                                                                            #
 # 1 = Federal University of São Carlos - UFSCar - https://www2.ufscar.br     #
 # Campus São Carlos | Computer Department - DC - https://site.dc.ufscar.br | #
 # Post Graduate Program in Computer Science - PPGCC                          # 
 # http://ppgcc.dc.ufscar.br | Bioinformatics and Machine Learning Group      #
 # BIOMAL - http://www.biomal.ufscar.br                                       # 
-#                                                                            #
-# 2 - Federal University of Santa Catarina Campus Blumenau - UFSC            #
+#                                                                            # 
+# 1 = Federal University of Lavras - UFLA                                    #
+#                                                                            # 
+# 2 = State University of São Paulo - USP                                    #
+#                                                                            # 
+# 3 - Federal University of Santa Catarina Campus Blumenau - UFSC            #
 # https://ufsc.br/                                                           #
 #                                                                            #
-# 3 - Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium           #
+# 4 and 5 - Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium     #
 # Medicine Department - https://kulak.kuleuven.be/                           #
 # https://kulak.kuleuven.be/nl/over_kulak/faculteiten/geneeskunde            #
 #                                                                            #
-# 4 - Ecole Polytechnique | Institut Polytechnique de Paris | 1 rue Honoré   #
+# 6 - Ecole Polytechnique | Institut Polytechnique de Paris | 1 rue Honoré   #
 # d’Estienne d’Orves - 91120 - Palaiseau - FRANCE                            #
 #                                                                            #
 ##############################################################################
 
 
+#########################################################################
+FolderRoot = "~/HPML.D.CE"
+FolderScripts = "~/HPML.D.CE/R"
 
-FolderRoot = "~/Clusters-Chains-HPML"
-FolderScripts = "~/Clusters-Chains-HPML/R"
+
 
 
 #########################################################################
@@ -53,8 +61,8 @@ FolderScripts = "~/Clusters-Chains-HPML/R"
 #########################################################################
 directories <- function(parameters){
   
-  FolderRoot = "~/Clusters-Chains-HPML"
-  FolderScripts = "~/Clusters-Chains-HPML/R"
+  FolderRoot = "~/HPML.D.CE"
+  FolderScripts = "~/HPML.D.CE/R"
   
   retorno = list()
   
@@ -128,6 +136,22 @@ directories <- function(parameters){
     setwd(folderTested)
     dir_folderTested = dir(folderTested)
     n_folderTested = length(dir_folderTested)
+  }
+  
+  
+  #############################################################################
+  #
+  #############################################################################
+  folderPython = paste(FolderRoot, "/Python", sep="")
+  if(dir.exists(folderPython ) == TRUE){
+    setwd(folderPython )
+    dir_folderPython  = dir(folderPython )
+    n_folderPython  = length(dir_folderPython )
+  } else {
+    dir.create(folderPython)
+    setwd(folderPython )
+    dir_folderPython  = dir(folderPython )
+    n_folderPython  = length(dir_folderPython )
   }
   
   
@@ -327,6 +351,7 @@ directories <- function(parameters){
   # RETURN ALL PATHS                                                          #
   #############################################################################
   # retorno$folderReports = folderReports
+  retorno$folderPython = folderPython
   retorno$folderTested = folderTested
   retorno$folderResults = folderResults
   retorno$folderUtils = folderUtils
@@ -346,6 +371,7 @@ directories <- function(parameters){
   # RETURN ALL DIRS                                                           #
   #############################################################################
   # retorno$dir_folderReports = dir_folderReports
+  retorno$dir_folderPython = dir_folderPython
   retorno$dir_folderTested = dir_folderTested
   retorno$dir_folderResults = dir_folderResults
   retorno$dir_folderUtils = dir_folderUtils
@@ -365,6 +391,7 @@ directories <- function(parameters){
   # RETURN ALL LENGHTS                                                        #
   #############################################################################
   # retorno$n_folderReports = n_folderReports
+  retorno$n_folderPython = n_folderPython
   retorno$n_folderTested = n_folderTested
   retorno$n_folderResults = n_folderResults
   retorno$n_folderUtils = n_folderUtils
@@ -568,6 +595,9 @@ get.all.partitions <- function(parameters){
 }
 
 
+#########################################################################
+#
+#########################################################################
 properties.clusters <- function(nomes.labels.clusters,
                                 fold,
                                 cluster,
@@ -863,6 +893,9 @@ properties.clusters <- function(nomes.labels.clusters,
 }
 
 
+#########################################################################
+#
+#########################################################################
 predictions.information <- function(nomes.rotulos, 
                                     proba, 
                                     preds, 
@@ -1090,7 +1123,7 @@ matrix.confusao <- function(true, pred, type, salva, nomes.rotulos){
   
   res = rbind(num.positive.instances, num.negative.instances)
   name = paste(salva, "/", type, "-ins-pn.csv", sep="")
-  write.csv(res, name)
+  #write.csv(res, name)
   
   true_1 = data.frame(ifelse(true==1,1,0)) # calcular rótulo verdadeiro igual a 1
   total_true_1 = apply(true_1, 2, sum)
@@ -1107,7 +1140,7 @@ matrix.confusao <- function(true, pred, type, salva, nomes.rotulos){
   matriz_totais = cbind(total_true_0, total_true_1, total_pred_0, total_pred_1)
   row.names(matriz_totais) = nomes.rotulos
   name = paste(salva, "/", type, "-trues-preds.csv", sep="")
-  write.csv(matriz_totais, name)
+  #write.csv(matriz_totais, name)
   
   # Verdadeiro Positivo: O modelo previu 1 e a resposta correta é 1
   TPi  = data.frame(ifelse((true_1 & true_1),1,0))
@@ -1131,7 +1164,7 @@ matrix.confusao <- function(true, pred, type, salva, nomes.rotulos){
   
   fpnt = data.frame(TPi, FPi, FNi, TNi)
   name = paste(salva, "/", type, "-tfpn.csv", sep="")
-  write.csv(fpnt, name, row.names = FALSE)
+  #write.csv(fpnt, name, row.names = FALSE)
   
   # total de verdadeiros positivos
   TPl = apply(TPi, 2, sum)
@@ -1162,18 +1195,22 @@ matrix.confusao <- function(true, pred, type, salva, nomes.rotulos){
 
 
 
+#########################################################################
+#
+#########################################################################
+
 avaliacao <- function(f, y_true, y_pred, salva, nome){
   
-  salva.0 = paste(salva, "/", nome, "-conf-mat.txt", sep="")
-  sink(file=salva.0, type="output")
+  #salva.0 = paste(salva, "/", nome, "-conf-mat.txt", sep="")
+  #sink(file=salva.0, type="output")
   confmat = multilabel_confusion_matrix(y_true, y_pred)
-  print(confmat)
-  sink()
+  #print(confmat)
+  #sink()
   
   resConfMat = multilabel_evaluate(confmat)
   resConfMat = data.frame(resConfMat)
   names(resConfMat) = paste("Fold-", f, sep="")
-  salva.1 = paste(salva, "/", nome, "-evaluated.csv", sep="")
+  salva.1 = paste(salva, "/", nome, ".csv", sep="")
   write.csv(resConfMat, salva.1)
   
   conf.mat = data.frame(confmat$TPl, confmat$FPl,
@@ -1188,7 +1225,7 @@ avaliacao <- function(f, y_true, y_pred, salva, nome){
   conf.mat.2 = data.frame(conf.mat, conf.mat.perc, wrong, correct, 
                           wrong.perc, correct.perc)
   salva.2 = paste(salva, "/", nome, "-utiml.csv", sep="")
-  write.csv(conf.mat.2, salva.2)
+  #write.csv(conf.mat.2, salva.2)
   
   
 }

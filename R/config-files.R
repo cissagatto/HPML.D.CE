@@ -1,9 +1,8 @@
-rm(list = ls())
+#rm(list = ls())
 
 ##############################################################################
-# HYBRID PARTITIONS FOR MULTI-LABEL CLASSIFICATION                           #
-# CLUSTERS CHAINS HPML                                                       #
-# Copyright (C) 2023                                                         #
+# Label Clusters Chains for Multi-Label Classification                       #
+# Copyright (C) 2025                                                         #
 #                                                                            #
 # This code is free software: you can redistribute it and/or modify it under #
 # the terms of the GNU General Public License as published by the Free       #
@@ -13,18 +12,32 @@ rm(list = ls())
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General   #
 # Public License for more details.                                           #
 #                                                                            #
-# PhD Elaine Cecilia Gatto | Prof. Dr. Ricardo Cerri | Prof. Dr. Mauri       #
-# Ferrandin | Prof. Dr. Celine Vens | PhD Felipe Nakano Kenji                #
+# 1 - Prof Elaine Cecilia Gatto                                              #
+# 2 - Prof PhD Ricardo Cerri                                                 #
+# 3 - Prof PhD Mauri Ferrandin                                               #
+# 4 - Prof PhD Celine Vens                                                   #
+# 5 - PhD Felipe Nakano Kenji                                                #
+# 6 - Prof PhD Jesse Read                                                    #
 #                                                                            #
-# Federal University of São Carlos - UFSCar - https://www2.ufscar.br         #
-# Campus São Carlos - Computer Department - DC - https://site.dc.ufscar.br   #
+# 1 = Federal University of São Carlos - UFSCar - https://www2.ufscar.br     #
+# Campus São Carlos | Computer Department - DC - https://site.dc.ufscar.br | #
 # Post Graduate Program in Computer Science - PPGCC                          # 
-# http://ppgcc.dc.ufscar.br - Bioinformatics and Machine Learning Group      #
-# BIOMAL - http://www.biomal.ufscar.br                                       #
+# http://ppgcc.dc.ufscar.br | Bioinformatics and Machine Learning Group      #
+# BIOMAL - http://www.biomal.ufscar.br                                       # 
+#                                                                            # 
+# 1 = Federal University of Lavras - UFLA                                    #
+#                                                                            # 
+# 2 = State University of São Paulo - USP                                    #
+#                                                                            # 
+# 3 - Federal University of Santa Catarina Campus Blumenau - UFSC            #
+# https://ufsc.br/                                                           #
 #                                                                            #
-# Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium               #
+# 4 and 5 - Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium     #
 # Medicine Department - https://kulak.kuleuven.be/                           #
 # https://kulak.kuleuven.be/nl/over_kulak/faculteiten/geneeskunde            #
+#                                                                            #
+# 6 - Ecole Polytechnique | Institut Polytechnique de Paris | 1 rue Honoré   #
+# d’Estienne d’Orves - 91120 - Palaiseau - FRANCE                            #
 #                                                                            #
 ##############################################################################
 
@@ -32,10 +45,12 @@ rm(list = ls())
 ##################################################
 # SET WORK SPACE
 ##################################################
-FolderRoot = "~/Clusters-Chains-HPML"
-FolderScripts = "~/Clusters-Chains-HPML"
+FolderRoot = "~/HPML.D.CE"
+FolderScripts = "~/HPML.D.CE/R"
 
+# getwd()
 
+# Rscript clusters.R /config-files/cluster-bibtex.csv
 
 ##################################################
 # PACKAGES
@@ -49,6 +64,7 @@ library(stringr)
 setwd(FolderRoot)
 datasets = data.frame(read.csv("datasets-original.csv"))
 n = nrow(datasets)
+
 
 
 ##################################################
@@ -80,7 +96,7 @@ Criteria.2 = c("s")
 
 
 ######################################################
-FolderCF = paste(FolderRoot, "/config-files-apptainer", sep="")
+FolderCF = paste(FolderRoot, "/config-files", sep="")
 if(dir.exists(FolderCF)==FALSE){dir.create(FolderCF)}
 
 # IMPLEMENTAÇÃO
@@ -133,28 +149,14 @@ while(p<=length(Implementation.1)){
           write("Config, Value",
                 file = output.file, append = TRUE)
           
-          write("Dataset_Path, /Datasets", 
+          write("Dataset_Path, ~/HPML.D.CE/Datasets", 
                file = output.file, append = TRUE)
           
-          # write("Dataset_Path, /home/biomal/Datasets", 
-          #      file = output.file, append = TRUE)
-          
-          # write("Dataset_Path, /home/elaine/Datasets", 
-          #      file = output.file, append = TRUE)
-          
           folder.name = paste("/tmp/", name, sep = "")
-          # folder.name = paste("/dev/shm/", name, sep = "")
-          
           str1 = paste("Temporary_Path, ", folder.name, sep="")
           write(str1,file = output.file, append = TRUE)
-          
-          #/home/biomal
-          str.1 = paste("2-Best-Partitions/HPML.A/", 
-                        Similarity.1[s], "/",
-                        Dendrogram.1[f], "/", 
-                        Criteria.1[w],
-                        sep="")
-          
+       
+          str.1 = paste("~/HPML.D.CE/Best-Partitions", sep="")
           str.2 = paste("Partitions_Path, ", str.1,  sep="")
           write(str.2, file = output.file, append = TRUE)
           

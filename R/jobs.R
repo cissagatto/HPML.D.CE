@@ -1,7 +1,7 @@
 rm(list = ls())
 
 ##############################################################################
-# Clusters CHAINS HPML                                                       #  
+# HPML-D-CE                                                                  # 
 # Copyright (C) 2023                                                         #
 #                                                                            #
 # This code is free software: you can redistribute it and/or modify it under #
@@ -28,11 +28,13 @@ rm(list = ls())
 ##############################################################################
 
 
+#getwd()
+
 ##################################################
 # SET WORK SPACE
 ##################################################
-FolderRoot = "~/Clusters-Chains-HPML"
-FolderScripts = "~/Clusters-Chains-HPML/R"
+FolderRoot = "~/HPML.D.CE"
+FolderScripts = "~/HPML.D.CE/R"
 
 
 ##################################################
@@ -81,7 +83,7 @@ Criteria.2 = c("s")
 FolderJobs = paste(FolderRoot, "/jobs", sep="")
 if(dir.exists(FolderJobs)==FALSE){dir.create(FolderJobs)}
 
-FolderCF = "/Clusters-Chains-HPML/config-files-apptainer"
+FolderCF = "/config-files-apptainer"
 
 # IMPLEMENTAÇÃO
 p = 1

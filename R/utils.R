@@ -1198,7 +1198,6 @@ matrix.confusao <- function(true, pred, type, salva, nomes.rotulos){
 #########################################################################
 #
 #########################################################################
-
 avaliacao <- function(f, y_true, y_pred, salva, nome){
   
   #salva.0 = paste(salva, "/", nome, "-conf-mat.txt", sep="")
@@ -1226,7 +1225,6 @@ avaliacao <- function(f, y_true, y_pred, salva, nome){
                           wrong.perc, correct.perc)
   salva.2 = paste(salva, "/", nome, "-utiml.csv", sep="")
   #write.csv(conf.mat.2, salva.2)
-  
   
 }
 

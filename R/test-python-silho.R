@@ -57,9 +57,9 @@ build.python.silho <- function(parameters){
   
   parameters = parameters
   
-  f = 1
+  # f = 1
   # build.paralel.ecc <- foreach(f = 1:parameters$Config$Number.Folds) %dopar%{
-  while(f<=parameters$Config$Number.Folds){
+  # while(f<=parameters$Config$Number.Folds){
     
     cat("\n\n\n#===================================================#")
     cat("\n# FOLD [", f, "]                                      #")
@@ -196,7 +196,7 @@ build.python.silho <- function(parameters){
               row.names = FALSE)
     
     
-    f = f + 1
+    # f = f + 1
     gc()
     cat("\n")
   } # fim do for each
@@ -217,9 +217,9 @@ build.python.silho <- function(parameters){
 ##############################################################################
 evaluate.python.silho <- function(parameters){
   
-  f = 1
-  #avalParal <- foreach(f = 1:parameters$Config$Number.Folds) %dopar%{
-  while(f<=parameters$Config$Number.Folds){
+  #  f = 1
+  avalParal <- foreach(f = 1:parameters$Config$Number.Folds) %dopar%{
+  # while(f<=parameters$Config$Number.Folds){
     
     cat("\n\n\n#======================================================")
     cat("\n# Fold: ", f)
@@ -492,7 +492,7 @@ evaluate.python.silho <- function(parameters){
     #           Folder = Folder.Tested.Split, nome = "thr-05")
     
     
-    f = f + 1
+    # f = f + 1
     gc()
   } # fim do for each
   

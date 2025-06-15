@@ -70,11 +70,11 @@ execute.run.python <- function(parameters){
     
   } else {
     
-    cl <- parallel::makeCluster(parameters$Config$Number.Cores )
+    cl <- parallel::makeCluster(parameters$Config$Number.Cores)
     doParallel::registerDoParallel(cl)
     print(cl)
     
-    if(number_cores==1){
+    if(parameters$Config$Number.Cores==1){
       cat("\n\n##########################################################")
       cat("\n# Running Sequentially!                                    #")
       cat("\n############################################################\n\n")
@@ -84,7 +84,7 @@ execute.run.python <- function(parameters){
       cat("\n##############################################################\n\n")
     }
   }
-  cl = cl
+  
   
   cat("\n\n#######################################################")
     cat("\n# RUN python: Get labels                              #")

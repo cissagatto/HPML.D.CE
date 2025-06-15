@@ -1,38 +1,51 @@
-# LABEL CLUSTERS CHAINS FOR MULTI-LABEL CLASSIFICATION
+# Label Clusters Chains for Multi-Label Classification 🏷️🔗
 
 This code is part of my PhD research at PPG-CC/DC/UFSCar in colaboration with Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium.
 
 We use the same principles of Ensemble of Classifiers Chains but applied to a Chain of Label Partitions. 
 
-## How to cite 
+## 📚 How to Cite
 
-@misc{Gatto2025, author = {Gatto, E. C.}, title = {Label Clusters Chains for Multi-Label Classification}, year = {2025}, publisher = {GitHub}, journal = {GitHub repository}, 
-howpublished = {\url{https://github.com/cissagatto/HPML.D.CE}}}
+```bibtex
+@misc{Gatto2025,
+  author = {Gatto, E. C.},
+  title = {Label Clusters Chains for Multi-Label Classification},
+  year = {2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/cissagatto/HPML.D.CE}}
+}
+```
 
-## Source Code
-This code source is composed of the project R to be used in RStudio IDE and also the following scripts R:
 
-1. libraries.R
-2. utils.R
-3. test-python.R
-4. run-python.R
-5. clusters.R
-6. jobs.R
-7. config-files.R
+## 🗂️ Project Structure
 
-The code also consists of the following Python scripts, which are in the Python folder
+The codebase includes R and Python scripts that must be used together.
 
-1. confusion_matrix.py
-2. measures.py
-3. evaluation.py
-4. lccml.py
-5. main.py
+### R Scripts (in `/R` folder):
 
-For the code to work perfectly, both R and PYTHON scripts are required.
+* `libraries.R`
+* `utils.R`
+* `test-silho-clus.R` (need to reupload)
+* `test-silho-python.R`
+* `run-clus.R` (need to reupload)
+* `run-python.R`
+* `clusters.R`
+* `jobs.R`
+* `config-files.R`
 
-## Preparing your experiment
+### Python Scripts (in `/Python` folder):
 
-### STEP 1
+* `confusion_matrix.py`
+* `measures.py`
+* `evaluation.py`
+* `lccml.py`
+* `main.py`
+
+
+## ⚙️ How to Reproduce the Experiment
+
+### Step 1 – Prepare the Dataset Metadata File
 A file called _datasets-original.csv_ must be in the *root project directory*. This file is used to read information about the datasets and they are used in the code. We have 90 multilabel datasets in this _.csv_ file. If you want to use another dataset, please, add the following information about the dataset in the file:
 
 
@@ -69,11 +82,11 @@ A file called _datasets-original.csv_ must be in the *root project directory*. T
 2 - [Click here](https://link.springer.com/book/10.1007/978-3-319-41111-8) to get explanation about each property.
 
 
-### STEP 2
+### Step 2 – Obtain Cross-Validation Files
 To run this experiment you need the _X-Fold Cross-Validation_ files and they must be compacted in **tar.gz** format. You can download these files, with 10-folds, ready for multilabel dataset by clicking [here](https://www.4shared.com/directory/ypgzwzjq/datasets-cross-validation.html). For a new dataset, in addition to including it in the **datasets-original.csv** file, you must also run this code [here](https://github.com/cissagatto/crossvalidationmultilabel). In the repository in question you will find all the instructions needed to generate the files in the format required for this experiment. The **tar.gz** file can be placed on any directory on your computer or server. The absolute path of the file should be passed as a parameter in the configuration file that will be read by **start.R** script. The dataset folds will be loaded from there.
 
 
-### STEP 3
+### Step 3 – Prepare Best Label Partitions
 You will need the previously best chosen partitions by one of the following codes:
 
 - https://github.com/cissagatto/Best-Partition-Silhouette
@@ -87,7 +100,7 @@ You must use here the results generated from the *OUTPUT* directory in that sour
 
 
 
-### STEP 4
+### Step 4 – Install Dependencies
 You need to have installed all the Java, Python and R packages required to execute this code on your machine or server. This code does not provide any type of automatic package installation!
 
 You can use the [Conda Environment](https://1drv.ms/u/s!Aq6SGcf6js1mw4hbhU9Raqarl8bH8Q?e=IA2aQs) that I created to perform this experiment. Below are the links to download the files. Try to use the command below to extract the environment to your computer:
@@ -102,7 +115,7 @@ You can also run this code using the AppTainer [container](https://1drv.ms/u/s!A
 
 
 
-### STEP 5
+### Step 5 – Create the Configuration File
 To run this code you will need a configuration file saved in *csv* format and with the following information:
 
 | Config          | Value                                                                            | 
@@ -128,24 +141,24 @@ To run this code you will need a configuration file saved in *csv* format and wi
 You can save configuration files wherever you want. The absolute path will be passed as a command line argument.
 
 
-## Software Requirements
+## 🛠️ Software Requirements
 This code was develop in RStudio 2024.12.0+467 "Kousa Dogwood" Release (cf37a3e5488c937207f992226d255be71f5e3f41, 2024-12-11) for Ubuntu Jammy Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) rstudio/2024.12.0+467 Chrome/126.0.6478.234 Electron/31.7.6 Safari/537.36, Quarto 1.5.57
 
-## Hardware Requirements
+- R version 4.5.0 (2025-04-11) -- "How About a Twenty-Six", Copyright (C) 2025 The R Foundation for Statistical Computing, Platform: x86_64-pc-linux-gnu
+- Python 3.10
+- Conda 24.11.3
+
+## 💻 Hardware Recommendations
 This code may or may not be executed in parallel, however, it is highly recommended that you run it in parallel. The number of cores can be configured via the command line (number_cores). If number_cores = 1 the code will run sequentially. In our experiments, we used 10 cores. For reproducibility, we recommend that you also use ten cores. This code was tested with the emotions dataset in the following machine:
 
 - Linux 6.11.0-26-generic #26~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC x86_64 x86_64 x86_64 GNU/Linux
 - Distributor ID: Ubuntu, Description: Ubuntu 24.04.2 LTS, Release: 24.04, Codename: noble
 - Manufacturer: Acer, Product Name: Nitro ANV15-51, Version: V1.16, Wake-up Type: Power Switch, Family: Acer Nitro V 15
 
-Then the experiment was executed in a cluster at UFSCar.
+Then the experiment was executed in a cluster at UFSC (Federal University of Santa Catarina Campus Blumenau).
 
 
-## Results
-The results are stored in the _RESULTS_ directory.
-
-
-## RUN
+## 🚀 Running the Experiment
 To run the code, open the terminal, enter the *~/HPML.D.CE/R* directory, and type:
 
 ```
@@ -155,8 +168,12 @@ Rscript clusters.R [absolute_path_to_config_file]
 Example:
 
 ```
-Rscript clusters.R "~/HPML.D.CE/R/config-files/cluster-emotions.csv"
+Rscript clusters.R "~/HPML.D.CE/config-files/cluster-emotions.csv"
 ```
+
+## 📊 Results
+The results are stored in the _RESULTS_ directory.
+
 
 ## DOWNLOAD RESULTS
 [Click here]
@@ -168,8 +185,9 @@ Rscript clusters.R "~/HPML.D.CE/R/config-files/cluster-emotions.csv"
 - The authors also thank the Brazilian research agencies FAPESP financial support.
 - (Belgium ....)
 
-# Contact
-elainececiliagatto@gmail.com
+## 📞 Contact
+Elaine Cecília Gatto
+✉️ [elainececiliagatto@gmail.com](mailto:elainececiliagatto@gmail.com)
 
 ## Links
 

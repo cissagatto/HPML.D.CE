@@ -58,7 +58,7 @@ build.python.silho <- function(parameters){
   parameters = parameters
   
   # f = 1
-  # build.paralel.ecc <- foreach(f = 1:parameters$Config$Number.Folds) %dopar%{
+  build.paralel.ecc <- foreach(f = 1:parameters$Config$Number.Folds) %dopar%{
   # while(f<=parameters$Config$Number.Folds){
     
     cat("\n\n\n#===================================================#")

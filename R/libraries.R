@@ -57,7 +57,7 @@ FolderScripts = "~/HPML.D.CE/R"
 #' - Automatically installs 'devtools' if needed for GitHub installations.
 #' - Provides progress messages and basic error handling.
 #' 
-#' @author ChatGPT
+#' @author Elaine Cecília Gatto
 #' @date 2025-06-12
 
 # List of required CRAN packages

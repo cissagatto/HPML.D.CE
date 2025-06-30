@@ -1,6 +1,6 @@
 cat("\n\n########################################################")
-cat("\n# RSCRIPT: START EXECUTE CLUSTERS                        #")
-cat("\n##########################################################\n\n")
+  cat("\n# RSCRIPT: START EXECUTE CLUSTERS                      #")
+  cat("\n########################################################\n\n")
 
 
 ##############################################################################
@@ -45,24 +45,14 @@ cat("\n##########################################################\n\n")
 ##############################################################################
 
 
-# getwd()
-
 cat("\n################################")
 cat("\n# Set Work Space               #")
-cat("\n###############################\n\n")
-FolderRoot = "~/HPML.D.CE"
-FolderScripts = "~/HPML.D.CE/R"
+cat("\n################################\n\n")
+library(here)
+library(stringr)
+FolderRoot <- here::here()
+setwd(FolderRoot)
 
-
-cat("\n########################################")
-cat("\n# Loading R Sources                    #")
-cat("\n########################################\n\n")
-
-setwd(FolderScripts)
-source("libraries.R")
-
-setwd(FolderScripts)
-source("utils.R")
 
 
 cat("\n########################################")
@@ -93,7 +83,7 @@ args <- commandArgs(TRUE)
 
 config_file <- args[1]
 
-# config_file = "~/HPML.D.CE/config-files/cluster-emotions.csv"
+# config_file = "~/HPML.D.CE/config-files/lcc-emotions-1.csv"
 
 
 if(file.exists(config_file)==FALSE){
@@ -109,68 +99,84 @@ if(file.exists(config_file)==FALSE){
 }
 
 
-cat("\n########################################")
-cat("\n# Config File                          #\n")
+cat("\n##########################################################################")
+cat("\n# Config File                                                            #\n")
 config = data.frame(read.csv(config_file))
 print(config)
-cat("\n########################################\n\n")
+cat("\n##########################################################################\n\n")
 
-dataset_path = toString(config$Value[1])
+FolderScript = toString(config$Value[1])
+FolderScript = str_remove(FolderScript, pattern = " ")
+parameters$Config$FolderScript = FolderScript
+
+dataset_path = toString(config$Value[2])
 dataset_path = str_remove(dataset_path, pattern = " ")
 parameters$Config$Dataset.Path = dataset_path
 
-folderResults = toString(config$Value[2])
+folderResults = toString(config$Value[3])
 folderResults = str_remove(folderResults, pattern = " ")
 parameters$Config$Folder.Results = folderResults
 
-Partitions_Path = toString(config$Value[3])
+Partitions_Path = toString(config$Value[4])
 Partitions_Path = str_remove(Partitions_Path, pattern = " ")
 parameters$Config$Partitions.Path = Partitions_Path
 
-Implementation = toString(config$Value[4])
+Implementation = toString(config$Value[5])
 Implementation = str_remove(Implementation, pattern = " ")
 parameters$Config$Implementation = Implementation
 
-similarity = toString(config$Value[5])
+similarity = toString(config$Value[6])
 similarity = str_remove(similarity, pattern = " ")
 parameters$Config$Similarity = similarity
 
-dendrogram = toString(config$Value[6])
+dendrogram = toString(config$Value[7])
 dendrogram = str_remove(dendrogram, pattern = " ")
 parameters$Config$Dendrogram = dendrogram
 
-criteria = toString(config$Value[7])
+criteria = toString(config$Value[8])
 criteria = str_remove(criteria, pattern = " ")
 parameters$Config$Criteria = criteria 
 
-dataset_name = toString(config$Value[8])
+dataset_name = toString(config$Value[9])
 dataset_name = str_remove(dataset_name, pattern = " ")
 parameters$Config$Dataset.Name = dataset_name
 
-number_dataset = as.numeric(config$Value[9])
+number_dataset = as.numeric(config$Value[10])
 parameters$Config$Number.Dataset = number_dataset
 
-number_folds = as.numeric(config$Value[10])
+number_folds = as.numeric(config$Value[11])
 parameters$Config$Number.Folds = number_folds
 
-number_cores = as.numeric(config$Value[11])
+number_cores = as.numeric(config$Value[12])
 parameters$Config$Number.Cores = number_cores
+
+number_chains = as.numeric(config$Value[13])
+parameters$Config$Number.Chains = number_chains
 
 ds = datasets[number_dataset,]
 parameters$DatasetInfo = ds
 
 
-cat("\n\nCreating directories")
+cat("\n########################################")
+cat("\n# Loading R Sources                    #")
+cat("\n########################################\n\n")
+source(file.path(parameters$Config$FolderScript, "libraries.R"))
+source(file.path(parameters$Config$FolderScript, "utils.R"))
+
+
+cat("\n########################################")
+cat("\n# Creating directories                 #")
+cat("\n########################################\n\n")
 if (dir.exists(folderResults) == FALSE) {dir.create(folderResults)}
 diretorios <- directories(parameters)
 parameters$Folders = diretorios
 
 
-cat("\n\nChecking the dataset tar.gz file")
+cat("\n########################################")
+cat("\n# Checking the dataset tar.gz file     #")
+cat("\n########################################\n\n")
 str00 = paste(dataset_path, "/", ds$Name,".tar.gz", sep = "")
 str00 = str_remove(str00, pattern = " ")
-
-# str00 = "~/HPML.D.CE/Datasets/emotions.tar.gz"
 
 if(file.exists(str00)==FALSE){
   
@@ -216,11 +222,11 @@ if(file.exists(str00)==FALSE){
 }
 
 
-cat("\n\nChecking the BEST HYBRID PARTITIONS tar.gz file")
+cat("\n######################################################")
+cat("\n# Checking the BEST HYBRID PARTITIONS tar.gz file    #")
+cat("\n######################################################\n\n")
 str00 = paste(Partitions_Path, "/", ds$Name,".tar.gz", sep = "")
 str00 = str_remove(str00, pattern = " ")
-
-# str00 = "~/HPML.D.CE/Best-Partitions/jaccard/ward.D2/silho/emotions.tar.gz"
 
 if(file.exists(str00)==FALSE){
   
@@ -316,21 +322,22 @@ if(parameters$Config$Implementation =="clus"){
  
 } else if(parameters$Config$Implementation=="python"){
   
-  cat("\n\nRUNNING PYTHON\n")  
-  
-  setwd(FolderScripts)
-  source("run-python.R")
+  cat("\n######################################################")
+  cat("\n# RUNNING PYTHON                                     #")  
+  cat("\n######################################################\n\n")
+  source(file.path(parameters$Config$FolderScript, "run-python.R"))
   
   timeFinal <- system.time(results <- execute.run.python(parameters))
   result_set <- t(data.matrix(timeFinal))
   setwd(parameters$Folders$folderTested)
-  write.csv(result_set, "Final-Runtime.csv")
+  write.csv(result_set, "Final-Runtime.csv", row.names = FALSE)
   
-  cat("\n\nCOMPRESS AND COPY TO RESULTS FOLDER\n")
-  
+  cat("\n######################################################")
+  cat("\n# COMPRESS AND COPY TO RESULTS FOLDER                #")
+  cat("\n######################################################\n\n")
   # Pastas
   origem  <- parameters$Folders$folderTested
-  destino <- "~/HPML.D.CE/Results/"
+  destino <- parameters$Folders$folderReports
   
   # Nome do dataset (vai ser o nome do arquivo)
   nome_dataset <- parameters$DatasetInfo$Name

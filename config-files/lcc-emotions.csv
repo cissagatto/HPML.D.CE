@@ -1,0 +1,14 @@
+Config, Value
+FolderScripts, /lapix/arquivos/elaine/HPML.D.CE/R
+Dataset_Path, /lapix/arquivos/elaine/HPML.D.CE/Datasets
+Temporary_Path, /tmp/lcc-emotions
+Partitions_Path, /lapix/arquivos/elaine/HPML.D.CE/Best-Partitions
+Implementation, python
+Similarity, jaccard
+Dendrogram, ward.D2
+Criteria, silho
+Dataset_Name, emotions
+Number_Dataset, 26
+Number_Folds, 10
+Number_Cores, 10
+Number_Chains, 1

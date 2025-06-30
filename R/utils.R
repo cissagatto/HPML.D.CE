@@ -40,10 +40,14 @@
 ##############################################################################
 
 
-#########################################################################
-FolderRoot = "~/HPML.D.CE"
-FolderScripts = "~/HPML.D.CE/R"
 
+# cat("\n################################")
+# cat("\n# Set Work Space               #")
+# cat("\n###############################\n\n")
+# library(here)
+# library(stringr)
+# FolderRoot <- here::here()
+# setwd(FolderRoot)
 
 
 
@@ -61,8 +65,9 @@ FolderScripts = "~/HPML.D.CE/R"
 #########################################################################
 directories <- function(parameters){
   
-  FolderRoot = "~/HPML.D.CE"
-  FolderScripts = "~/HPML.D.CE/R"
+  library(here)
+  library(stringr)
+  FolderRoot <- here::here()
   
   retorno = list()
   
@@ -109,17 +114,33 @@ directories <- function(parameters){
   #############################################################################
   #
   #############################################################################
-  # folderReports = paste(FolderRoot, "/Reports", sep="")
-  # if(dir.exists(folderReports) == TRUE){
-  #   setwd(folderReports)
-  #   dir_folderReports = dir(folderReports)
-  #   n_folderReports = length(dir_folderReports)
-  # } else {
-  #   dir.create(folderReports)
-  #   setwd(folderReports)
-  #   dir_folderReports = dir(folderReports)
-  #   n_folderReports = length(dir_folderReports)
-  # }
+  folderScript = paste(FolderRoot, "/R", sep="")
+  if(dir.exists(folderScript) == TRUE){
+    setwd(folderScript)
+    dir_folderScript = dir(folderScript)
+    n_folderScript = length(dir_folderScript)
+  } else {
+    dir.create(folderScript)
+    setwd(folderScript)
+    dir_folderScript = dir(folderScript)
+    n_folderScript = length(dir_folderScript)
+  }
+  
+  
+  #############################################################################
+  #
+  #############################################################################
+  folderReports = paste(FolderRoot, "/Reports", sep="")
+  if(dir.exists(folderReports) == TRUE){
+    setwd(folderReports)
+    dir_folderReports = dir(folderReports)
+    n_folderReports = length(dir_folderReports)
+  } else {
+    dir.create(folderReports)
+    setwd(folderReports)
+    dir_folderReports = dir(folderReports)
+    n_folderReports = length(dir_folderReports)
+  }
   
   
   
@@ -350,7 +371,8 @@ directories <- function(parameters){
   #############################################################################
   # RETURN ALL PATHS                                                          #
   #############################################################################
-  # retorno$folderReports = folderReports
+  retorno$folderReports = folderReports
+  retorno$folderScript = folderScript
   retorno$folderPython = folderPython
   retorno$folderTested = folderTested
   retorno$folderResults = folderResults
@@ -370,7 +392,8 @@ directories <- function(parameters){
   #############################################################################
   # RETURN ALL DIRS                                                           #
   #############################################################################
-  # retorno$dir_folderReports = dir_folderReports
+  retorno$dir_folderReports = dir_folderReports
+  retorno$dir_folderScript = dir_folderScript
   retorno$dir_folderPython = dir_folderPython
   retorno$dir_folderTested = dir_folderTested
   retorno$dir_folderResults = dir_folderResults
@@ -390,7 +413,8 @@ directories <- function(parameters){
   #############################################################################
   # RETURN ALL LENGHTS                                                        #
   #############################################################################
-  # retorno$n_folderReports = n_folderReports
+  retorno$n_folderReports = n_folderReports
+  retorno$n_folderScript = n_folderScript
   retorno$n_folderPython = n_folderPython
   retorno$n_folderTested = n_folderTested
   retorno$n_folderResults = n_folderResults

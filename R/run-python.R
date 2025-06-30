@@ -40,8 +40,13 @@
 ##############################################################################
 
 
-FolderRoot = "~/HPML.D.CE"
-FolderScripts = "~/HPML.D.CE/R"
+# cat("\n################################")
+# cat("\n# Set Work Space               #")
+# cat("\n###############################\n\n")
+# library(here)
+# library(stringr)
+# FolderRoot <- here::here()
+# setwd(FolderRoot)
 
 
 
@@ -53,13 +58,8 @@ FolderScripts = "~/HPML.D.CE/R"
 # delete: if you want, or not, to delete all folders and files generated                         #
 ##################################################################################################
 execute.run.python <- function(parameters){
-  
-  FolderRoot = "~/HPML.D.CE"
-  FolderScripts = "~/HPML.D.CE/R"
-  
-  setwd(FolderScripts)
-  source("utils.R")
-  
+
+  source(file.path(parameters$Config$FolderScript, "utils.R"))
   
   if(parameters$Config$Number.Cores == 0){
     
@@ -76,36 +76,44 @@ execute.run.python <- function(parameters){
     
     if(parameters$Config$Number.Cores==1){
       cat("\n\n##########################################################")
-      cat("\n# Running Sequentially!                                    #")
-      cat("\n############################################################\n\n")
+        cat("\n# Running Sequentially!                                  #")
+        cat("\n##########################################################\n\n")
     } else {
-      cat("\n\n############################################################")
+      cat("\n\n###############################################################################")
       cat("\n# Running in parallel with ", parameters$Config$Number.Cores , " cores!         #")
-      cat("\n##############################################################\n\n")
+      cat("\n#################################################################################\n\n")
     }
   }
   
   
   cat("\n\n#######################################################")
-    cat("\n# RUN python: Get labels                              #")
+    cat("\n# RUN: Get labels                                     #")
     cat("\n#######################################################\n\n")
-  arquivo = paste(parameters$Folders$folderNamesLabels, "/" ,
-                  dataset_name, "-NamesLabels.csv", sep="")
-  namesLabels = data.frame(read.csv(arquivo))
-  colnames(namesLabels) = c("id", "labels")
-  namesLabels = c(namesLabels$labels)
-  parameters$Config$NamesLabels = namesLabels
+  # arquivo = paste(parameters$Folders$folderNamesLabels, "/" ,
+  #                 dataset_name, "-NamesLabels.csv", sep="")
+  # namesLabels = data.frame(read.csv(arquivo))
+  # colnames(namesLabels) = c("id", "labels")
+  # namesLabels = c(namesLabels$labels)
+  # parameters$Config$NamesLabels = namesLabels
+  
+  #/tmp/lcc-emotions/Datasets/emotions/CrossValidation/Tr
+  
+  file = paste0(parameters$Folders$folderCVTR, "/", 
+                parameters$DatasetInfo$Name, "-Split-Tr-1.csv")
+  arquivo = data.frame(read.csv(file))
+  labels = arquivo[, parameters$DatasetInfo$LabelStart:parameters$DatasetInfo$LabelEnd]
+  parameters$Config$NamesLabels = colnames(labels)
   
   
   cat("\n\n#######################################################")
-    cat("\n# RUN python: Get the label space                     #")
+    cat("\n# RUN: Get the label space                            #")
     cat("\n#######################################################\n\n")
   timeLabelSpace = system.time(resLS <- labelSpace(parameters))
   parameters$LabelSpace = resLS
   
   
   cat("\n\n##################################################")
-    cat("\n# RUN python: Get all partitions                 #")
+    cat("\n# RUN: Get all partitions                        #")
     cat("\n##################################################\n\n")
   timeAllPartitions = system.time(resAP <- get.all.partitions(parameters))
   parameters$All.Partitions = resAP
@@ -187,8 +195,7 @@ execute.run.python <- function(parameters){
     
   } else {
     
-    setwd(FolderScripts)
-    source("test-python-silho.R")
+    source(file.path(parameters$Config$FolderScript, "test-python-silho.R"))
     
     cat("\n\n#######################################################")
       cat("\n# RUN python SILHOUETTE: Build and Test Partitions    #")

@@ -40,11 +40,16 @@
 ##############################################################################
 
 
-###########################################################################
-#
-###########################################################################
-FolderRoot = "~/HPML.D.CE"
-FolderScripts = "~/HPML.D.CE/R"
+# cat("\n################################")
+# cat("\n# Set Work Space               #")
+# cat("\n###############################\n\n")
+# library(here)
+# library(stringr)
+# FolderRoot <- here::here()
+# setwd(FolderRoot)
+
+
+
 
 #' @title Install and Load Required Packages
 #' @description
@@ -63,7 +68,7 @@ FolderScripts = "~/HPML.D.CE/R"
 # List of required CRAN packages
 cran_packages <- c(
   "foreign", "dplyr", "stringr", "foreach", "doParallel",
-  "rJava", "RWeka", "mldr", "utiml"
+  "rJava", "RWeka", "mldr", "utiml", "here"
 )
 
 # Base packages (already included with R)

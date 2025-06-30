@@ -24,38 +24,21 @@
 import sys
 import platform
 import os
-
-system = platform.system()
-if system == 'Windows':
-    user_profile = os.environ['USERPROFILE']
-    FolderRoot = os.path.join(user_profile, 'Documents', 'MultiLabelEvaluationMetrics', 'src')
-elif system in ['Linux', 'Darwin']:  # 'Darwin' is the system name for macOS
-    FolderRoot = os.path.expanduser('~/LCCML/src')
-else:
-    raise Exception('Unsupported operating system')
-
-os.chdir(FolderRoot)
-current_directory = os.getcwd()
-sys.path.append('..')
-
+import time
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier  
-
 import importlib
 import lccml
 importlib.reload(lccml)
 from lccml import LCCML
-
 import evaluation as eval
 importlib.reload(eval)
-
 import measures as ms
 importlib.reload(ms)
 
 
 if __name__ == '__main__':    
     
-    n_chains = 10
     random_state = 0
     n_estimators = 200
     baseModel = RandomForestClassifier(n_estimators = n_estimators, 
@@ -65,7 +48,10 @@ if __name__ == '__main__':
     valid = pd.read_csv(sys.argv[2])
     test = pd.read_csv(sys.argv[3])
     partitions = pd.read_csv(sys.argv[4])
-    directory = sys.argv[5]       
+    directory = sys.argv[5]
+    n_chains = int(sys.argv[6])
+    
+    # print(" NUMBER CHAINS ", n_chains)
     
     #train = pd.read_csv("/tmp/emotions/Datasets/emotions/CrossValidation/Tr/emotions-Split-Tr-1.csv")
     #test = pd.read_csv("/tmp/emotions/Datasets/emotions/CrossValidation/Ts/emotions-Split-Ts-1.csv")
@@ -87,7 +73,15 @@ if __name__ == '__main__':
     lccml = LCCML(baseModel,n_chains)
     lccml.fit(x_train,y_train,clusters,) 
 
+    start_time = time.time()
     test_predictions = pd.DataFrame(lccml.predict(x_test))
+    end_time = time.time()
+    predict_time = end_time - start_time
+    
+    name = (directory + "/predict_time.csv")
+    predict_time = pd.DataFrame({'predict_time': [predict_time]})
+    predict_time.to_csv(name, index=False)
+    
     train_predictions = pd.DataFrame(lccml.predict(x_train))
     
     # test_predictions.columns
@@ -106,12 +100,10 @@ if __name__ == '__main__':
     y_test.to_csv(true, index=False)     
     y_test[allLabels].to_csv(true, index=False)
     
-    res_curves = eval.multilabel_curves_measures(y_test, test_predictions)
-    res_lp = eval.multilabel_label_problem_measures(y_test, test_predictions)
-    
-    res_final = pd.concat([res_curves, res_lp], ignore_index=True)    
+    res_curves = eval.multilabel_curve_metrics(y_test, test_predictions)
+    #res_final = pd.concat([res_curves, res_lp], ignore_index=True)    
     name = (directory + "/results-python.csv") 
-    res_final.to_csv(name, index=False)
+    res_curves.to_csv(name, index=False)
 
     model_sizes = lccml.chain_model_sizes
     total_model_size = lccml.total_model_size

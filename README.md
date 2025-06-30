@@ -133,6 +133,7 @@ To run this code you will need a configuration file saved in *csv* format and wi
 | Number_Dataset  | Dataset number according to *dataset-original.csv* file                          |
 | Number_Folds    | Number of folds used in cross validation                                         |
 | Number_Cores    | Number of cores for parallel processing                                          |
+| Number_Chains   | Number of chains to use in the ensemble. 1 equal to only one chain               |
 
 
 1 - Use directorys like */dev/shm*, *tmp* or *scratch* here.
@@ -162,13 +163,13 @@ Then the experiment was executed in a cluster at UFSC (Federal University of San
 To run the code, open the terminal, enter the *~/HPML.D.CE/R* directory, and type:
 
 ```
-Rscript clusters.R [absolute_path_to_config_file]
+Rscript elccml.R [absolute_path_to_config_file]
 ```
 
 Example:
 
 ```
-Rscript clusters.R "~/HPML.D.CE/config-files/cluster-emotions.csv"
+Rscript elccml.R "~/HPML.D.CE/config-files/lcc-emotions.csv"
 ```
 
 ## 📊 Results

@@ -28,21 +28,6 @@
 import sys
 import platform
 import os
-
-system = platform.system()
-if system == 'Windows':
-    user_profile = os.environ['USERPROFILE']
-    FolderRoot = os.path.join(user_profile, 'Documents', 'MultiLabelEvaluationMetrics', 'src')
-elif system in ['Linux', 'Darwin']:  # 'Darwin' is the system name for macOS
-    FolderRoot = os.path.expanduser('~/MultiLabelEvaluationMetrics/src')
-else:
-    raise Exception('Unsupported operating system')
-
-os.chdir(FolderRoot)
-current_directory = os.getcwd()
-sys.path.append('..')
-
-
 import pandas as pd
 import numpy as np
 

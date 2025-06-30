@@ -40,11 +40,14 @@
 ##############################################################################
 
 
-###############################################################################
-# SET WORKSAPCE                                                               #
-###############################################################################
-FolderRoot = "~/HPML.D.CE"
-FolderScripts = "~/HPML.D.CE/R"
+
+# cat("\n################################")
+# cat("\n# Set Work Space               #")
+# cat("\n###############################\n\n")
+# library(here)
+# library(stringr)
+# FolderRoot <- here::here()
+# setwd(FolderRoot)
 
 
 
@@ -55,8 +58,6 @@ FolderScripts = "~/HPML.D.CE/R"
 ##############################################################################
 build.python.silho <- function(parameters){
   
-  parameters = parameters
-  
   # f = 1
   build.paralel.ecc <- foreach(f = 1:parameters$Config$Number.Folds) %dopar%{
   # while(f<=parameters$Config$Number.Folds){
@@ -65,38 +66,33 @@ build.python.silho <- function(parameters){
     cat("\n# FOLD [", f, "]                                      #")
     cat("\n#====================================================#\n\n\n")
     
+    cat("\n##########################################################")
+    cat("\n# Load R Sources                                         #")
+    cat("\n##########################################################\n\n")
+    source(file.path(parameters$Config$FolderScript, "libraries.R"))
+    source(file.path(parameters$Config$FolderScript, "utils.R"))
     
-    ########################################################################
-    cat("\nWorkSpace")
-    FolderRoot = "~/HPML.D.CE"
-    FolderScripts = "~/HPML.D.CE/R"
-    
-    
-    ########################################################################
-    cat("\nLoad Scripts")
-    setwd(FolderScripts)
-    source("utils.R")
-    
-    setwd(FolderScripts)
-    source("libraries.R")
+    #cat("\n##########################################################")
+    #cat("\n# Loading Python Sources                                 #")
+    #cat("\n##########################################################\n\n")
+    #str = paste0("python ", parameters$Folders$folderPython, "/check_packages.py")
+    #print(system(str))
     
     start <- proc.time()
     
-    ########################################################################
-    cat("\nGetting information about clusters")
+    cat("\n##########################################################")
+    cat("\n# Getting information about clusters                     #")
+    cat("\n##########################################################\n\n")
     best.part.info = data.frame(parameters$All.Partitions$best.part.info)
     all.partitions.info = data.frame(parameters$All.Partitions$all.partitions.info )
     all.total.labels = data.frame(parameters$All.Partitions$all.total.labels)
-    
     best.part.info.f = data.frame(filter(best.part.info, num.fold==f))
     all.total.labels.f = data.frame(filter(all.total.labels, num.fold==f))
-    # build.datasets.f = data.frame(filter(parameters$Labels.Attr$all.info, num.fold==f))
-    
-    # partição específica
     partition = data.frame(filter(all.partitions.info, num.fold==f))
     
-    ##########################################################################
-    cat("\nCreating Folders from Best Partitions and Splits Tests")
+    cat("\n##########################################################")
+    cat("\n# Creating Folders from Best Partitions and Splits Tests #")
+    cat("\n##########################################################\n\n")
     
     Folder.Best.Partition.Split = paste(parameters$Folders$folderPartitions, 
                                         "/", parameters$DatasetInfo$Name, 
@@ -111,79 +107,61 @@ build.python.silho <- function(parameters){
     
     Folder.BPF = paste(Folder.BP, "/Split-", f, sep="")
     
-    Folder.BPGP = paste(Folder.BPF, "/Partition-", best.part.info.f$num.part, 
+    Folder.BPGP = paste(Folder.BPF, "/Partition-", 
+                        best.part.info.f$num.part, 
                         sep="")
     
-    ########################################################################
-    cat("\nOpening TRAIN file")
+    cat("\n##########################################################")
+    cat("\n# Opening TRAIN file                                     #")
+    cat("\n##########################################################\n\n")
     train.name.file.csv = paste(parameters$Folders$folderCVTR, 
                                 "/", parameters$DatasetInfo$Name, 
                                 "-Split-Tr-", f, ".csv", sep="")
     train.file = data.frame(read.csv(train.name.file.csv))
     
-    
-    #####################################################################
-    cat("\nOpening VALIDATION file")
+    cat("\n##########################################################")
+    cat("\n# Opening VALIDATION file                                #")
+    cat("\n##########################################################\n\n")
     val.name.file.csv = paste(parameters$Folders$folderCVVL, 
                               "/", parameters$DatasetInfo$Name, 
                               "-Split-Vl-", f, ".csv", sep="")
     val.file = data.frame(read.csv(val.name.file.csv))
     
     
-    ########################################################################
-    cat("\nOpening TEST file")
+    cat("\n##########################################################")
+    cat("\n# Opening TEST file                                      #")
+    cat("\n##########################################################\n\n")
     test.name.file.csv = paste(parameters$Folders$folderCVTS,
                                "/", parameters$DatasetInfo$Name, 
                                "-Split-Ts-", f, ".csv", sep="")
     test.file = data.frame(read.csv(test.name.file.csv))
     
-    ########################################################################
-    cat("\nJoint Train and Validation")
+    cat("\n##########################################################")
+    cat("\n Join Train and Validation                               #")
+    cat("\n##########################################################\n\n")
     tv = rbind(train.file, val.file)
     
-    ####################
+    cat("\n##########################################################")
+    cat("\n# Partition                                              #")
+    cat("\n##########################################################\n\n")
     partition.csv.name = paste(Folder.BPGP, 
                                "/partition-", best.part.info.f$num.part, 
                                ".csv", sep="")
     
     particoes = data.frame(read.csv(partition.csv.name))
     
-    
-    ##################################################################
-    # EXECUTE ECC PYTHON
+    cat("\n##########################################################")
+    cat("\n# Execute Python                                         #")
+    cat("\n##########################################################\n\n")
     str.execute = paste("python3 ", parameters$Folders$folderPython,
                         "/main.py ",
                         train.name.file.csv, " ",
                         val.name.file.csv,  " ",
                         test.name.file.csv, " ",
                         partition.csv.name, " ",
-                        Folder.Tested.Split,
+                        Folder.Tested.Split, " ",
+                        Number.Chains = parameters$Config$Number.Chains,
                         sep="")
-    
-    # str.execute = paste("/home/cissagatto/miniforge3/envs/Teste/bin/python3.10/ ",
-    #                     parameters$Folders$folderUtils,
-    #                     "/Python/main.py ",
-    #                     train.name.file.csv, " ",
-    #                     val.name.file.csv,  " ",
-    #                     test.name.file.csv, " ",
-    #                     partition.csv.name, " ",
-    #                     Folder.Tested.Split,
-    #                     sep="")
-    
-    # str.execute = paste("~/miniforge3/envs/py310/bin/python", 
-    #                     parameters$Folders$folderUtils, 
-    #                     "/Python/main.py ", 
-    #                     train.name.file.csv, " ",
-    #                     val.name.file.csv,  " ",
-    #                     test.name.file.csv, " ", 
-    #                     partition.csv.name, " ", 
-    #                     Folder.Tested.Split, 
-    #                     sep="")
-    
-    
-    
-    # EXECUTA
-    
     res = print(system(str.execute))
     if(res!=0){
       break
@@ -195,17 +173,15 @@ build.python.silho <- function(parameters){
                            "/runtime-fold.csv", sep=""),
               row.names = FALSE)
     
-    
     # f = f + 1
     gc()
-    cat("\n")
+    cat("\n\n\n\n\n")
   } # fim do for each
   
   gc()
-  cat("\n##################################################")
-  cat("\n# TEST: Build and Test Hybrid Partitions End     #")
-  cat("\n##################################################")
-  cat("\n\n\n\n")
+  cat("\n##########################################################")
+  cat("\n# TEST: Build and Test Hybrid Partitions END             #")
+  cat("\n##########################################################\n\n")
 }
 
 
@@ -217,40 +193,27 @@ build.python.silho <- function(parameters){
 ##############################################################################
 evaluate.python.silho <- function(parameters){
   
-  #  f = 1
+  # f = 1
   avalParal <- foreach(f = 1:parameters$Config$Number.Folds) %dopar%{
   # while(f<=parameters$Config$Number.Folds){
     
-    cat("\n\n\n#======================================================")
-    cat("\n# Fold: ", f)
-    cat("\n#======================================================\n\n\n")
+    cat("\n\n\n#===================================================#")
+    cat("\n# FOLD [", f, "]                                      #")
+    cat("\n#====================================================#\n\n\n")
     
-    ########################################################################
-    cat("\nWorkSpace")
-    FolderRoot = "~/HPML.D.CE"
-    FolderScripts = "~/HPML.D.CE/R"
-    
-    
-    ########################################################################
-    cat("\nLoad Scripts")
-    setwd(FolderScripts)
-    source("utils.R")
-    
-    setwd(FolderScripts)
-    source("libraries.R")
-    
+    cat("\n##########################################################")
+    cat("\n# Load R Sources                                         #")
+    cat("\n##########################################################\n\n")
+    source(file.path(parameters$Config$FolderScript, "libraries.R"))
+    source(file.path(parameters$Config$FolderScript, "utils.R"))
     
     ########################################################################
     cat("\nObtendo informações dos clusters para construir os datasets")
     best.part.info = data.frame(parameters$All.Partitions$best.part.info)
     all.partitions.info = data.frame(parameters$All.Partitions$all.partitions.info )
     all.total.labels = data.frame(parameters$All.Partitions$all.total.labels)
-    
     best.part.info.f = data.frame(filter(best.part.info, num.fold==f))
     all.total.labels.f = data.frame(filter(all.total.labels, num.fold==f))
-    # build.datasets.f = data.frame(filter(parameters$Labels.Attr$all.info, num.fold==f))
-    
-    # partição específica
     partition = data.frame(filter(all.partitions.info, num.fold==f))
     
     ##########################################################################

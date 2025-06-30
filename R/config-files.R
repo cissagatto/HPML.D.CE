@@ -103,29 +103,29 @@ if(dir.exists(FolderCF)==FALSE){dir.create(FolderCF)}
 p = 1
 while(p<=length(Implementation.1)){
   
-  FolderImplementation = paste(FolderCF, "/", Implementation.1[p], sep="")
-  if(dir.exists(FolderImplementation)==FALSE){dir.create(FolderImplementation)}
+  #FolderImplementation = paste(FolderCF, "/", Implementation.1[p], sep="")
+  #if(dir.exists(FolderImplementation)==FALSE){dir.create(FolderImplementation)}
   
   # SIMILARIDADE
   s = 1
   while(s<=length(Similarity.1)){
     
-    FolderSimilarity = paste(FolderImplementation, "/", Similarity.1[s], sep="")
-    if(dir.exists(FolderSimilarity)==FALSE){dir.create(FolderSimilarity)}
+    #FolderSimilarity = paste(FolderImplementation, "/", Similarity.1[s], sep="")
+    #if(dir.exists(FolderSimilarity)==FALSE){dir.create(FolderSimilarity)}
     
     # DENDROGRAMA
     f = 1
     while(f<=length(Dendrogram.1)){
       
-      FolderDendro = paste(FolderSimilarity, "/", Dendrogram.1[f], sep="")
-      if(dir.exists(FolderDendro)==FALSE){dir.create(FolderDendro)}
+      #FolderDendro = paste(FolderSimilarity, "/", Dendrogram.1[f], sep="")
+      #if(dir.exists(FolderDendro)==FALSE){dir.create(FolderDendro)}
       
       # CRITERIA
       w = 1
       while(w<=length(Criteria.1)){
         
-        FolderCriteria = paste(FolderDendro, "/", Criteria.1[w], sep="")
-        if(dir.exists(FolderCriteria)==FALSE){dir.create(FolderCriteria)}
+        #FolderCriteria = paste(FolderDendro, "/", Criteria.1[w], sep="")
+        #if(dir.exists(FolderCriteria)==FALSE){dir.create(FolderCriteria)}
         
         # DATASET
         d = 1
@@ -140,23 +140,26 @@ while(p<=length(Implementation.1)){
           cat("\n\t", Criteria.1[w])
           cat("\n\t", ds$Name)
           
-          name = paste("cluster-", ds$Name, sep="")  
+          name = paste("lcc-", ds$Name, sep="")  
           
-          file.name = paste(FolderCriteria, "/", name, ".csv", sep="")
+          file.name = paste(FolderCF, "/", name, ".csv", sep="")
           
           output.file <- file(file.name, "wb")
           
           write("Config, Value",
                 file = output.file, append = TRUE)
           
-          write("Dataset_Path, ~/HPML.D.CE/Datasets", 
-               file = output.file, append = TRUE)
+          write("FolderScripts, /lapix/arquivos/elaine/HPML.D.CE/R", 
+                file = output.file, append = TRUE)
+          
+          write("Dataset_Path, /lapix/arquivos/elaine/HPML.D.CE/Datasets", 
+                file = output.file, append = TRUE)
           
           folder.name = paste("/tmp/", name, sep = "")
           str1 = paste("Temporary_Path, ", folder.name, sep="")
           write(str1,file = output.file, append = TRUE)
        
-          str.1 = paste("~/HPML.D.CE/Best-Partitions", sep="")
+          str.1 = paste("/lapix/arquivos/elaine/HPML.D.CE/Best-Partitions", sep="")
           str.2 = paste("Partitions_Path, ", str.1,  sep="")
           write(str.2, file = output.file, append = TRUE)
           
@@ -181,6 +184,8 @@ while(p<=length(Implementation.1)){
           write("Number_Folds, 10", file = output.file, append = TRUE)
           
           write("Number_Cores, 10", file = output.file, append = TRUE)
+          
+          write("Number_Chains, 1", file = output.file, append = TRUE)
           
           close(output.file)
           

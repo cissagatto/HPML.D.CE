@@ -161,7 +161,9 @@ build.python.silho <- function(parameters){
                         partition.csv.name, " ",
                         Folder.Tested.Split, " ",
                         Number.Chains = parameters$Config$Number.Chains,
+                        #fold = f,
                         sep="")
+    
     res = print(system(str.execute))
     if(res!=0){
       break

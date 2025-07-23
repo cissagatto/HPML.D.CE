@@ -28,6 +28,7 @@ import time
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier  
 import importlib
+
 import lccml
 importlib.reload(lccml)
 from lccml import LCCML
@@ -37,28 +38,37 @@ import measures as ms
 importlib.reload(ms)
 
 
-if __name__ == '__main__':    
+if __name__ == '__main__':            
     
-    random_state = 0
-    n_estimators = 200
-    baseModel = RandomForestClassifier(n_estimators = n_estimators, 
-                                       random_state = random_state)
-
+    # =========== READING DATA ===========
     train = pd.read_csv(sys.argv[1])
     valid = pd.read_csv(sys.argv[2])
     test = pd.read_csv(sys.argv[3])
     partitions = pd.read_csv(sys.argv[4])
     directory = sys.argv[5]
     n_chains = int(sys.argv[6])
-    
+    # fold = int(sys.argv[7])
     # print(" NUMBER CHAINS ", n_chains)
-    
-    #train = pd.read_csv("/tmp/emotions/Datasets/emotions/CrossValidation/Tr/emotions-Split-Tr-1.csv")
-    #test = pd.read_csv("/tmp/emotions/Datasets/emotions/CrossValidation/Ts/emotions-Split-Ts-1.csv")
-    #valid = pd.read_csv("/tmp/emotions/Datasets/emotions/CrossValidation/Vl/emotions-Split-Vl-1.csv")
-    #partitions = pd.read_csv("/tmp/emotions/Partitions/emotions/Split-1/Partition-2/partition-2.csv")
-    #directory = "/tmp/emotions/Tested/Split-1"    
+   
+    #train = pd.read_csv("/tmp/lcc-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Tr/GnegativeGO-Split-Tr-1.csv")
+    #test = pd.read_csv("/tmp/lcc-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Ts/GnegativeGO-Split-Ts-1.csv")
+    #valid = pd.read_csv("/tmp/lcc-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Vl/GnegativeGO-Split-Vl-1.csv")
+    #partitions = pd.read_csv("/tmp/lcc-GnegativeGO/Partitions/GnegativeGO/Split-1/Partition-7/partition-7.csv")
+    #directory = "/tmp/lcc-GnegativeGO/Tested/Split-1"    
+    #n_chains = 1
+    #fold = 1
 
+    #print("\n\n%==============================================%")
+    #print("train: ", sys.argv[1])
+    #print("valid: ", sys.argv[2])
+    #print("test: ", sys.argv[3])
+    #print("partitions: ", sys.argv[4])
+    #print("directory: ", sys.argv[5])
+    #print("n_chains: ", sys.argv[6])
+    #print("FOLD: ", sys.argv[7])
+    #print("%==============================================%\n\n")
+
+    
     train = pd.concat([train,valid],axis=0).reset_index(drop=True)
 
     clusters = partitions.groupby("group")["label"].apply(list)   
@@ -70,43 +80,60 @@ if __name__ == '__main__':
     x_test = test.drop(allLabels, axis=1)
     y_test = test[allLabels]
 
-    lccml = LCCML(baseModel,n_chains)
-    lccml.fit(x_train,y_train,clusters,) 
+    # =========== INITIALIZE MODEL ===========
+    random_state = 0
+    n_estimators = 200
+    baseModel = RandomForestClassifier(n_estimators = n_estimators, 
+                                       random_state = random_state)
+    modelo = LCCML(baseModel,n_chains)
 
-    start_time = time.time()
-    test_predictions = pd.DataFrame(lccml.predict(x_test))
-    end_time = time.time()
-    predict_time = end_time - start_time
-    
-    name = (directory + "/predict_time.csv")
-    predict_time = pd.DataFrame({'predict_time': [predict_time]})
-    predict_time.to_csv(name, index=False)
-    
-    train_predictions = pd.DataFrame(lccml.predict(x_train))
-    
-    # test_predictions.columns
-    # allLabels
-    
-    true = (directory + "/y_true.csv")
-    pred = (directory + "/y_proba.csv")   
-    train = (directory + "/y_train.csv") 
-    
-    test_predictions.to_csv(pred, index=False)
-    test[allLabels].to_csv(true, index=False)
+    # =========== FIT ===========            
+    start_time_train = time.time()
+    modelo.fit(x_train,y_train,clusters,) 
+    end_time_train = time.time()
+    train_duration = end_time_train - start_time_train
 
-    train_predictions.to_csv(train, index=False)
-    train_predictions[allLabels].to_csv(true, index=False)
-
-    y_test.to_csv(true, index=False)     
-    y_test[allLabels].to_csv(true, index=False)
+    # =========== PREDICT ===========
+    start_time_test_bin = time.time()
+    bin = pd.DataFrame(modelo.predict(x_test))
+    end_time_test_bin = time.time()
+    test_duration_bin = end_time_test_bin - start_time_test_bin        
     
-    res_curves = eval.multilabel_curve_metrics(y_test, test_predictions)
-    #res_final = pd.concat([res_curves, res_lp], ignore_index=True)    
+    # =========== PREDICT PROBA ===========
+    start_time_test_proba = time.time()    
+    proba = lccml.safe_predict_proba(modelo, x_test, y_train)
+    end_time_test_proba = time.time()
+    test_duration_proba = end_time_test_proba - start_time_test_proba           
+
+    # =========== SAVE TIME PREDICT ===========
+    times_df = pd.DataFrame({        
+        'train_duration': [train_duration],
+        'test_duration_proba': [test_duration_proba],
+        'test_duration_bin': [test_duration_bin]
+    })
+    times_path = os.path.join(directory, "runtime-python-2.csv")
+    times_df.to_csv(times_path, index=False)   
+
+    # =========== SAVE PREDICTIONS ===========   
+    # probas_df = pd.DataFrame(proba, columns=labels_y_test)
+    probas_path = os.path.join(directory, "y_proba.csv")
+    proba.to_csv(probas_path, index=False)   
+    
+    bin_path = os.path.join(directory, "bin_python.csv")
+    bin.to_csv(bin_path, index=False)   
+
+    y_test.to_csv(os.path.join(directory, 'y_true.csv'), index=False)
+
+    # =========== SAVE MEASURES ===========   
+    metrics_df, ignored_df = eval.multilabel_curve_metrics(y_test, proba)    
     name = (directory + "/results-python.csv") 
-    res_curves.to_csv(name, index=False)
-
-    model_sizes = lccml.chain_model_sizes
-    total_model_size = lccml.total_model_size
+    metrics_df.to_csv(name, index=False)  
+    name = (directory + "/ignored-classes.csv") 
+    ignored_df.to_csv(name, index=False)  
+    
+    # =========== SAVE MODEL SIZE ===========   
+    model_sizes = modelo.chain_model_sizes
+    total_model_size = modelo.total_model_size
 
     df_sizes = pd.DataFrame({
         'chain_index': list(range(len(model_sizes))),
@@ -119,9 +146,9 @@ if __name__ == '__main__':
     name = (directory + "/model-size.csv")     
     df_sizes.to_csv(name, index=False)
 
-    train_times = lccml.chain_train_times
-    train_time_total = lccml.train_time_total
-    test_time_total = lccml.test_time_total
+    train_times = modelo.chain_train_times
+    train_time_total = modelo.train_time_total
+    test_time_total = modelo.test_time_total
 
     df_times = pd.DataFrame({
         'chain_index': list(range(len(train_times))),
@@ -133,9 +160,4 @@ if __name__ == '__main__':
     df_times['test_time_total'] = test_time_total  # repete o total para cada linha, ou ajuste como quiser
 
     name = (directory + "/runtime-python.csv")     
-    df_times.to_csv(name, index=False)
-  
-    
-
-
-
+    df_times.to_csv(name, index=False) 

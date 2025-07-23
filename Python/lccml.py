@@ -496,3 +496,81 @@ class LCCML:
         # predictions_aggregated = predictions.groupby(predictions.index).max()
 
         return predictions_aggregated
+
+
+def safe_predict_proba(model, X_test, Y_train):
+    """
+    Safely computes class probabilities for LCCML (Label Cluster Chains for Multi-label Learning),
+    handling classifiers trained on a single class.
+
+    This version manually iterates over each chain and cluster in the LCCML ensemble,
+    replicating the structure of LCCML.predict(), but with safe `predict_proba` logic
+    that avoids IndexErrors.
+
+    Parameters
+    ----------
+    model : LCCML
+        A fitted LCCML model containing multiple chains (each as a list of cluster models).
+    
+    X_test : pandas.DataFrame
+        Test features.
+    
+    Y_train : pandas.DataFrame
+        Training labels (used to retrieve label names and order).
+
+    Returns
+    -------
+    pd.DataFrame
+        Predicted probabilities averaged over all chains.
+        Shape: (n_samples, n_labels), columns ordered as in Y_train.
+
+    Example
+    -------
+    >>> proba_df = safe_predict_proba_lccml(lccml, X_test, Y_train)
+    >>> proba_df.to_csv("y_pred_proba.csv", index=False)
+    """
+    import numpy as np
+    import pandas as pd
+
+    all_chain_probas = []
+
+    for chain in model.chains:
+        n_samples = X_test.shape[0]
+        n_labels = Y_train.shape[1]
+        probas = pd.DataFrame(np.zeros((n_samples, n_labels)), columns=Y_train.columns)
+        X_aug = X_test.copy()
+
+        for cluster_model in chain:
+            label_names = list(cluster_model.labelName_)
+            proba = cluster_model.predict_proba(X_aug)
+
+            # Trata o caso de apenas uma label no cluster
+            if isinstance(proba, list):  # multilabel por cluster
+                preds = []
+                for i, p in enumerate(proba):
+                    if p.shape[1] == 2:
+                        print("normal")
+                        preds.append(p[:, 1])
+                    else:      
+                        print("not normal")                  
+                        preds.append(np.ones(p.shape[0]) if cluster_model.classes_[i][0] == 1 else np.zeros(p.shape[0]))
+                pred_df = pd.DataFrame(np.array(preds).T, columns=label_names)
+            else:  # cluster com uma label
+                if proba.shape[1] == 2:
+                    print("normal")
+                    pred_df = pd.DataFrame(proba[:, 1].reshape(-1, 1), columns=label_names)
+                else:
+                    print("not normal")
+                    val = 1.0 if cluster_model.classes_[0] == 1 else 0.0
+                    pred_df = pd.DataFrame(np.full((n_samples, 1), val), columns=label_names)
+
+            probas[label_names] = pred_df
+            X_aug = pd.concat([X_aug, pred_df], axis=1)
+
+        # garante ordenação dos rótulos
+        probas = probas[Y_train.columns]
+        all_chain_probas.append(probas)
+
+    # Média entre cadeias
+    avg_probas = sum(all_chain_probas) / len(all_chain_probas)
+    return avg_probas

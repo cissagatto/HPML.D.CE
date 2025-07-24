@@ -456,7 +456,6 @@ evaluate.python.silho <- function(parameters){
     # roc.curva(f = f, y_pred = y_threshold_05, test = mldr.teste,
     #           Folder = Folder.Tested.Split, nome = "thr-05")
     
-    
     # f = f + 1
     gc()
   } # fim do for each
@@ -480,99 +479,201 @@ evaluate.python.silho <- function(parameters){
 ###########################################################################
 gather.eval.python.silho <- function(parameters){
   
-  final.runtime.r = data.frame()
-  final.runtime.p = data.frame()
-  final.results = data.frame(apagar=c(0))
-  chain.model.size = data.frame(apagar=c(0))
-  total.chain.model.size = data.frame()
-  runtime.chain = data.frame(apagar=c(0))
-  runtime.chain.total = data.frame()
+  if(parameters$Config$Number.Chains == 1){
+    
+    cat("\n ONLY ONE CHAIN")
+    
+    final.results = data.frame(apagar=c(0))
+    
+    final.runtime.r = data.frame()
+    final.runtime.p = data.frame()
+    final.runtime.p2 = data.frame()
+    
+    chain.model.size = data.frame(apagar=c(0))
+    total.chain.model.size = data.frame()
+    
+    runtime.chain = data.frame(apagar=c(0))
+    runtime.chain.total = data.frame()
+    
+    f = 1
+    while(f<=parameters$Config$Number.Folds){
+      
+      cat("\nFold: ", f)
+      
+      #########################################################################
+      folderSplit = paste(parameters$Folders$folderTested,
+                          "/Split-", f, sep="")
+      
+      #########################################################################
+      
+      res.model.size = data.frame(read.csv(paste(folderSplit, 
+                                                 "/model-size.csv", sep="")))
+      res2 = data.frame(fold = f, res.model.size)
+      total.chain.model.size = rbind(total.chain.model.size, res2)
+      
+      #########################################################################
+      res.python = data.frame(read.csv(paste(folderSplit, 
+                                             "/results-python.csv", sep="")))
+      names(res.python) = c("Measures", paste0("Fold",f))
+      res.utiml = data.frame(read.csv(paste(folderSplit, 
+                                            "/results-utiml.csv", sep="")))
+      names(res.utiml) = c("Measures", paste0("Fold",f))
+      resultados = rbind(res.python, res.utiml)
+      final.results = cbind(final.results, resultados)
+      
+      
+      #########################################################################
+      res.runtime.fold = data.frame(read.csv(paste(folderSplit, 
+                                                   "/runtime-fold.csv", sep="")))
+      res.runtime.fold = data.frame(fold=f, res.runtime.fold)
+      final.runtime.r = rbind(final.runtime.r, res.runtime.fold)
+
+      #########################################################################      
+      res.runtime.python = data.frame(read.csv(paste(folderSplit, 
+                                                     "/runtime-python.csv", sep="")))
+      res2 = data.frame(fold = f, res.runtime.python)
+      runtime.chain.total = rbind(runtime.chain.total, res2)
+      
+      #########################################################################
+      res.runtime.p2 = data.frame(read.csv(paste(folderSplit, 
+                                                 "/runtime-python-2.csv", sep="")))
+      res.runtime.p2 = data.frame(fold = f, res.runtime.p2)
+      final.runtime.p2 = rbind(final.runtime.p2, res.runtime.p2)
+      
+      #################################
+      system(paste0("rm -r ", folderSplit, "/results-python.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/model-size.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/runtime-python-2.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep=""))
+      
+      f = f + 1
+      gc()
+    }
+    
+    
+    setwd(parameters$Folders$folderTested)
+    write.csv(total.chain.model.size, "chain-model-size-total.csv", row.names = FALSE)
+    
+    final.results <- final.results[, !duplicated(colnames(final.results))]
+    final.results = final.results[,-1]
+    write.csv(final.results, "performance.csv", row.names = FALSE)
+    
+    write.csv(final.runtime.r, "runtime-R.csv", row.names = FALSE)
+    write.csv(runtime.chain.total, "runtime-chain-total.csv", row.names = FALSE)
+    write.csv(final.runtime.p2, "runtime-P2.csv", row.names = FALSE)
+    
+    
+  } else {
+    
+    cat("\n MORE THAN ONE CHAIN")
+    
+    final.runtime.r = data.frame()
+    final.runtime.p = data.frame()
+    final.runtime.p2 = data.frame()
+    final.results = data.frame(apagar=c(0))
+    chain.model.size = data.frame(apagar=c(0))
+    total.chain.model.size = data.frame()
+    runtime.chain = data.frame(apagar=c(0))
+    runtime.chain.total = data.frame()
+    
+    f = 1
+    while(f<=parameters$Config$Number.Folds){
+      
+      cat("\nFold: ", f)
+      
+      #########################################################################
+      folderSplit = paste(parameters$Folders$folderTested,
+                          "/Split-", f, sep="")
+      
+      #########################################################################
+      res.python = data.frame(read.csv(paste(folderSplit, 
+                                             "/results-python.csv", sep="")))
+      names(res.python) = c("Measures", paste0("Fold",f))
+      
+      #########################################################################
+      res.utiml = data.frame(read.csv(paste(folderSplit, 
+                                            "/results-utiml.csv", sep="")))
+      names(res.utiml) = c("Measures", paste0("Fold",f))
+      
+      #########################################################################
+      resultados = rbind(res.python, res.utiml)
+      final.results = cbind(final.results, resultados)
+      
+      #########################################################################
+      res.model.size = data.frame(read.csv(paste(folderSplit, 
+                                                 "/model-size.csv", sep="")))
+      res1 = res.model.size[c(1:parameters$Config$Number.Chains),]
+      names(res1) = c("chain_index", paste0("fold",f))
+      
+      res2 = res.model.size[parameters$Config$Number.Chains+1,] 
+      res2 = data.frame(fold = f, model_size = res2$model_size_bytes)
+      
+      chain.model.size = cbind(chain.model.size, res1)
+      total.chain.model.size = rbind(total.chain.model.size, res2)
+      
+      #########################################################################
+      res.runtime.fold = data.frame(read.csv(paste(folderSplit, 
+                                                   "/runtime-fold.csv", sep="")))
+      res.runtime.fold = res.runtime.fold[,-1]
+      res.runtime.fold = data.frame(fold=f, res.runtime.fold)
+      final.runtime.r = rbind(final.runtime.r, res.runtime.fold)
+      
+      #########################################################################
+      res.runtime.python = data.frame(read.csv(paste(folderSplit, 
+                                                     "/runtime-python.csv", sep="")))
+      res1 = res.runtime.python[c(1:parameters$Config$Number.Chains),]
+      names(res1) = c("chain_index", paste0("train-fold",f), 
+                      paste0("test-fold",f))
+      
+      res2 = res.runtime.python[parameters$Config$Number.Chains+1,] 
+      res2 = data.frame(fold = f, 
+                        train_time = res2$train_time, 
+                        test_time = res2$test_time_total)
+      
+      runtime.chain = cbind(runtime.chain, res1)
+      runtime.chain.total = rbind(runtime.chain.total, res2)
+      
+      #########################################################################
+      res.runtime.p2 = data.frame(read.csv(paste(folderSplit, 
+                                                 "/runtime-python-2.csv", sep="")))
+      res.runtime.p2 = data.frame(fold = f, res.runtime.p2)
+      final.runtime.p2 = rbind(final.runtime.p2, res.runtime.p2)
+      
+      #################################
+      system(paste0("rm -r ", folderSplit, "/results-python.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/model-size.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep=""))
+      system(paste0("rm -r ", folderSplit, "/runtime-python-2.csv", sep=""))
+      
+      f = f + 1
+      gc()
+    } 
+    
+    
+    setwd(parameters$Folders$folderTested)
+    final.results <- final.results[, !duplicated(colnames(final.results))]
+    final.results = final.results[,-1]
+    write.csv(final.results, "performance.csv", row.names = FALSE)
+    
+    chain.model.size <- chain.model.size[, !duplicated(colnames(chain.model.size))]
+    chain.model.size = chain.model.size[,-1]
+    write.csv(chain.model.size, "chain-model-size.csv", row.names = FALSE)
+    
+    runtime.chain <- runtime.chain[, !duplicated(colnames(runtime.chain))]
+    runtime.chain = runtime.chain[,-1]
+    write.csv(runtime.chain, "runtime-chain.csv", row.names = FALSE)
+    
+    write.csv(runtime.chain.total, "runtime-chain-total.csv", row.names = FALSE)
+    write.csv(total.chain.model.size, "chain-model-size-total.csv", row.names = FALSE)
+    write.csv(final.runtime.r, "runtime-R.csv", row.names = FALSE)
+    write.csv(final.runtime.p2, "runtime-P2.csv", row.names = FALSE)
+    
+  }
   
-  f = 1
-  while(f<=parameters$Config$Number.Folds){
-    
-    cat("\nFold: ", f)
-    
-    #########################################################################
-    folderSplit = paste(parameters$Folders$folderTested,
-                        "/Split-", f, sep="")
-    
-    #########################################################################
-    res.python = data.frame(read.csv(paste(folderSplit, 
-                                           "/results-python.csv", sep="")))
-    names(res.python) = c("Measures", paste0("Fold",f))
-    
-    #########################################################################
-    res.utiml = data.frame(read.csv(paste(folderSplit, 
-                                          "/results-utiml.csv", sep="")))
-    names(res.utiml) = c("Measures", paste0("Fold",f))
-    
-    #########################################################################
-    resultados = rbind(res.python, res.utiml)
-    final.results = cbind(final.results, resultados)
-    
-    #########################################################################
-    res.model.size = data.frame(read.csv(paste(folderSplit, 
-                                               "/model-size.csv", sep="")))
-    res1 = res.model.size[c(1:10),]
-    names(res1) = c("chain_index", paste0("fold",f))
-    
-    res2 = res.model.size[11,] 
-    res2 = data.frame(fold = f, model_size = res2$model_size_bytes)
-    
-    chain.model.size = cbind(chain.model.size, res1)
-    total.chain.model.size = rbind(total.chain.model.size, res2)
-    
-    #########################################################################
-    res.runtime.fold = data.frame(read.csv(paste(folderSplit, 
-                                                 "/runtime-fold.csv", sep="")))
-    res.runtime.fold = res.runtime.fold[,-1]
-    res.runtime.fold = data.frame(fold=f, res.runtime.fold)
-    final.runtime.r = rbind(final.runtime.r, res.runtime.fold)
-    
-    #########################################################################
-    res.runtime.python = data.frame(read.csv(paste(folderSplit, 
-                                                   "/runtime-python.csv", sep="")))
-    res1 = res.runtime.python[c(1:10),]
-    names(res1) = c("chain_index", paste0("train-fold",f), 
-                    paste0("test-fold",f))
-    
-    res2 = res.runtime.python[11,] 
-    res2 = data.frame(fold = f, 
-                      train_time = res2$train_time, 
-                      test_time = res2$test_time_total)
-    
-    runtime.chain = cbind(runtime.chain, res1)
-    runtime.chain.total = rbind(runtime.chain.total, res2)
-    
-    #################################
-    system(paste0("rm -r ", folderSplit, "/results-python.csv", sep=""))
-    system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep=""))
-    system(paste0("rm -r ", folderSplit, "/model-size.csv", sep=""))
-    system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep=""))
-    system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep=""))
-    
-    f = f + 1
-    gc()
-  } 
-  
-  
-  setwd(parameters$Folders$folderTested)
-  final.results <- final.results[, !duplicated(colnames(final.results))]
-  final.results = final.results[,-1]
-  write.csv(final.results, "performance.csv", row.names = FALSE)
-  
-  chain.model.size <- chain.model.size[, !duplicated(colnames(chain.model.size))]
-  chain.model.size = chain.model.size[,-1]
-  write.csv(chain.model.size, "chain-model-size.csv", row.names = FALSE)
-  
-  runtime.chain <- runtime.chain[, !duplicated(colnames(runtime.chain))]
-  runtime.chain = runtime.chain[,-1]
-  write.csv(runtime.chain, "runtime-chain.csv", row.names = FALSE)
-  
-  write.csv(runtime.chain.total, "runtime-chain-total.csv", row.names = FALSE)
-  write.csv(total.chain.model.size, "chain-model-size-total.csv", row.names = FALSE)
-  write.csv(final.runtime.r, "runtime-R.csv", row.names = FALSE)
   
   gc()
   cat("\n########################################################")

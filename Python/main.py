@@ -49,12 +49,12 @@ if __name__ == '__main__':
     n_chains = int(sys.argv[6])
     # fold = int(sys.argv[7])
     # print(" NUMBER CHAINS ", n_chains)
-   
-    #train = pd.read_csv("/tmp/lcc-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Tr/GnegativeGO-Split-Tr-1.csv")
-    #test = pd.read_csv("/tmp/lcc-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Ts/GnegativeGO-Split-Ts-1.csv")
-    #valid = pd.read_csv("/tmp/lcc-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Vl/GnegativeGO-Split-Vl-1.csv")
-    #partitions = pd.read_csv("/tmp/lcc-GnegativeGO/Partitions/GnegativeGO/Split-1/Partition-7/partition-7.csv")
-    #directory = "/tmp/lcc-GnegativeGO/Tested/Split-1"    
+  
+    #train = pd.read_csv("/tmp/lcc-Yelp/Datasets/Yelp/CrossValidation/Tr/Yelp-Split-Tr-1.csv")
+    #test = pd.read_csv("/tmp/lcc-Yelp/Datasets/Yelp/CrossValidation/Ts/Yelp-Split-Ts-1.csv")
+    #valid = pd.read_csv("/tmp/lcc-Yelp/Datasets/Yelp/CrossValidation/Vl/Yelp-Split-Vl-1.csv")
+    #partitions = pd.read_csv("/tmp/lcc-Yelp/Partitions/Yelp/Split-1/Partition-4/partition-4.csv")
+    #directory = "/tmp/lcc-Yelp/Tested/Split-1"    
     #n_chains = 1
     #fold = 1
 
@@ -94,35 +94,38 @@ if __name__ == '__main__':
     train_duration = end_time_train - start_time_train
 
     # =========== PREDICT ===========
-    start_time_test_bin = time.time()
-    bin = pd.DataFrame(modelo.predict(x_test))
-    end_time_test_bin = time.time()
-    test_duration_bin = end_time_test_bin - start_time_test_bin        
+    #start_time_test_bin = time.time()
+    #bin = pd.DataFrame(modelo.predict(x_test))
+    #end_time_test_bin = time.time()
+    #test_duration_bin = end_time_test_bin - start_time_test_bin        
     
     # =========== PREDICT PROBA ===========
     start_time_test_proba = time.time()    
     proba = lccml.safe_predict_proba(modelo, x_test, y_train)
     end_time_test_proba = time.time()
-    test_duration_proba = end_time_test_proba - start_time_test_proba           
+    test_duration_proba = end_time_test_proba - start_time_test_proba               
+
 
     # =========== SAVE TIME PREDICT ===========
     times_df = pd.DataFrame({        
         'train_duration': [train_duration],
         'test_duration_proba': [test_duration_proba],
-        'test_duration_bin': [test_duration_bin]
+        #'test_duration_bin': [test_duration_bin]
     })
     times_path = os.path.join(directory, "runtime-python-2.csv")
     times_df.to_csv(times_path, index=False)   
+
 
     # =========== SAVE PREDICTIONS ===========   
     # probas_df = pd.DataFrame(proba, columns=labels_y_test)
     probas_path = os.path.join(directory, "y_proba.csv")
     proba.to_csv(probas_path, index=False)   
     
-    bin_path = os.path.join(directory, "bin_python.csv")
-    bin.to_csv(bin_path, index=False)   
+    #bin_path = os.path.join(directory, "bin_python.csv")
+    #bin.to_csv(bin_path, index=False)   
 
     y_test.to_csv(os.path.join(directory, 'y_true.csv'), index=False)
+
 
     # =========== SAVE MEASURES ===========   
     metrics_df, ignored_df = eval.multilabel_curve_metrics(y_test, proba)    
@@ -130,6 +133,7 @@ if __name__ == '__main__':
     metrics_df.to_csv(name, index=False)  
     name = (directory + "/ignored-classes.csv") 
     ignored_df.to_csv(name, index=False)  
+
     
     # =========== SAVE MODEL SIZE ===========   
     model_sizes = modelo.chain_model_sizes
@@ -146,6 +150,8 @@ if __name__ == '__main__':
     name = (directory + "/model-size.csv")     
     df_sizes.to_csv(name, index=False)
 
+
+    # =========== SAVE RUNTIME ===========   
     train_times = modelo.chain_train_times
     train_time_total = modelo.train_time_total
     test_time_total = modelo.test_time_total

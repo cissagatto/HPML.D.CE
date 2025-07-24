@@ -84,7 +84,7 @@ args <- commandArgs(TRUE)
 config_file <- args[1]
 
 
-# config_file = "~/HPML.D.CE/config-files/lcc-yahoo_reference-1.csv"
+# config_file = "~/HPML.D.CE/config-files/lcc-Yelp-1.csv"
 
 
 if(file.exists(config_file)==FALSE){

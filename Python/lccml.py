@@ -80,25 +80,15 @@ class LCCML:
     Example of Usage
     ----------------
     from sklearn.ensemble import RandomForestClassifier
-
-    model_base = RandomForestClassifier()
-    
+    model_base = RandomForestClassifier()    
     lccml = LCCML(model=model_base, n_chains=10)
-
     clusters = [['label1', 'label2'], ['label3'], ['label4', 'label5']]
-
-    lccml.fit(X_train, Y_train, clusters)
-    
+    lccml.fit(X_train, Y_train, clusters)    
     Y_pred = lccml.predict(X_test)
-
-    print("Total training time:", lccml.train_time_total)
-    
-    print("Training times per chain:", lccml.chain_train_times)
-    
-    print("Model sizes (bytes):", lccml.chain_model_sizes)
-    
-    print("Total model size (bytes):", lccml.total_model_size)
-    
+    print("Total training time:", lccml.train_time_total)    
+    print("Training times per chain:", lccml.chain_train_times)    
+    print("Model sizes (bytes):", lccml.chain_model_sizes)    
+    print("Total model size (bytes):", lccml.total_model_size)    
     print("Total prediction time:", lccml.test_time_total)
     """
 
@@ -529,9 +519,7 @@ def safe_predict_proba(model, X_test, Y_train):
     >>> proba_df = safe_predict_proba_lccml(lccml, X_test, Y_train)
     >>> proba_df.to_csv("y_pred_proba.csv", index=False)
     """
-    import numpy as np
-    import pandas as pd
-
+  
     all_chain_probas = []
 
     for chain in model.chains:
@@ -549,7 +537,7 @@ def safe_predict_proba(model, X_test, Y_train):
                 preds = []
                 for i, p in enumerate(proba):
                     if p.shape[1] == 2:
-                        print("normal")
+                        # print("normal")
                         preds.append(p[:, 1])
                     else:      
                         print("not normal")                  
@@ -557,7 +545,7 @@ def safe_predict_proba(model, X_test, Y_train):
                 pred_df = pd.DataFrame(np.array(preds).T, columns=label_names)
             else:  # cluster com uma label
                 if proba.shape[1] == 2:
-                    print("normal")
+                    # print("normal")
                     pred_df = pd.DataFrame(proba[:, 1].reshape(-1, 1), columns=label_names)
                 else:
                     print("not normal")

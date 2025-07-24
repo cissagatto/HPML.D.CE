@@ -1,6 +1,6 @@
 # Label Clusters Chains for Multi-Label Classification 🏷️🔗
 
-This code is part of my PhD research at PPG-CC/DC/UFSCar in colaboration with Katholieke Universiteit Leuven Campus Kulak Kortrijk Belgium.
+This code is part of my PhD research at PPG-CC/DC/UFSCar in colaboration with Katholieke Universiteit of Leuven Campus Kulak Kortrijk Belgium.
 
 We use the same principles of Ensemble of Classifiers Chains but applied to a Chain of Label Partitions. 
 
@@ -120,6 +120,7 @@ To run this code you will need a configuration file saved in *csv* format and wi
 
 | Config          | Value                                                                            | 
 |-----------------|----------------------------------------------------------------------------------| 
+| FolderScripts 	| Absolute path to the R folder scripts                                            |
 | Dataset_Path    | Absolute path to the directory where the dataset's tar.gz is stored              |
 | Temporary_Path  | Absolute path to the directory where temporary processing will be performed * 1  |
 | Partitions_Path | Absolute path to the directory where the best partitions are                     |
@@ -173,7 +174,7 @@ Rscript elccml.R "~/HPML.D.CE/config-files/lcc-emotions.csv"
 ```
 
 ## 📊 Results
-The results are stored in the _RESULTS_ directory.
+The results are stored in the _REPORTS_ directory.
 
 
 ## DOWNLOAD RESULTS

@@ -185,7 +185,7 @@ while(p<=length(Implementation.1)){
           
           write("Number_Cores, 10", file = output.file, append = TRUE)
           
-          write("Number_Chains, 1", file = output.file, append = TRUE)
+          write("Number_Chains, 10", file = output.file, append = TRUE)
           
           close(output.file)
           

@@ -232,7 +232,7 @@ str00 = str_remove(str00, pattern = " ")
 if(file.exists(str00)==FALSE){
   
   cat("\n######################################################################")
-  cat("\n# The tar.gz file for the dataset to be processed does not exist!    #")
+  cat("\n# The tar.gz file for the partition to be processed does not exist!  #")
   cat("\n# Please pass the path of the tar.gz file in the configuration file! #")
   cat("\n# The path entered was: ", str00, "                                  #")
   cat("\n######################################################################\n\n")

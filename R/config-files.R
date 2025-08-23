@@ -140,7 +140,7 @@ while(p<=length(Implementation.1)){
           cat("\n\t", Criteria.1[w])
           cat("\n\t", ds$Name)
           
-          name = paste("lcc-", ds$Name, sep="")  
+          name = paste("elcc-", ds$Name, sep="")  
           
           file.name = paste(FolderCF, "/", name, ".csv", sep="")
           

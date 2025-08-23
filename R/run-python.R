@@ -221,7 +221,7 @@ execute.run.python <- function(parameters){
     timesExecute = rbind(timeAllPartitions, timeLabelSpace, 
                          timeBuild, timeEvaluate, timeGather)
     setwd(parameters$Folders$folderTested)
-    write.csv(timesExecute, "Run-Time-Silho-Python.csv")
+    write.csv(timesExecute, "Runtime-R-Per-Function.csv")
     
   }
   

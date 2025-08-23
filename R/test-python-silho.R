@@ -479,22 +479,119 @@ evaluate.python.silho <- function(parameters){
 ###########################################################################
 gather.eval.python.silho <- function(parameters){
   
+  Measures <- c(
+    "auprc_macro",
+    "auprc_micro",
+    "auprc_weighted",
+    "auprc_samples",
+    "roc_auc_macro",
+    "roc_auc_micro",
+    "roc_auc_weighted",
+    "roc_auc_samples",
+    "accuracy",
+    "average-precision",
+    "clp",
+    "coverage",
+    "F1",
+    "hamming-loss",
+    "macro-AUC",
+    "macro-F1",
+    "macro-precision",
+    "macro-recall",
+    "margin-loss",
+    "micro-AUC",
+    "micro-F1",
+    "micro-precision",
+    "micro-recall",
+    "mlp",
+    "one-error",
+    "precision",
+    "ranking-loss",
+    "recall",
+    "subset-accuracy",
+    "wlp"
+  )
+  
+  all.ignored.classes <- data.frame(
+    Measure = c(
+      "auprc_macro",
+      "auprc_micro",
+      "auprc_weighted",
+      "auprc_samples",
+      "roc_auc_macro",
+      "roc_auc_micro",
+      "roc_auc_weighted",
+      "roc_auc_samples"
+    ),
+    Ignored_Classes = I(rep(list(character(0)), 8)),
+    stringsAsFactors = FALSE
+  )
+  
+  all.model.size.from.memory <- data.frame(
+    fold = numeric(0),
+    size_bytes = numeric(0)
+  )
+  
+  all.model.size.from.model <- data.frame(
+    fold = numeric(0),
+    chain_index = integer(0),
+    chain_model_size = numeric(0),
+    total_model_size = numeric(0)
+  )
+  
+  all.model.size.from.model10 <- data.frame(
+    fold = numeric(0),
+    chain_model_size = numeric(0),
+    total_model_size = numeric(0)
+  )
+  
+  all.results.python <- data.frame(
+    Measure = character(0),
+    Value = numeric(0)
+  )
+  
+  all.results.utiml <- data.frame()
+  
+  all.performance <- data.frame(
+    Measures = rep(NA_character_, 30),
+    Values = rep(NA_real_, 30)
+  )
+  
+  all.runtime.fold <- data.frame(
+    fold = numeric(0),
+    user.self = numeric(0),
+    sys.self = numeric(0),
+    elapsed = numeric(0),
+    user.child = numeric(0),
+    sys.child = numeric(0)
+  )
+  
+  all.train.test.from.model <- data.frame(
+    fold = numeric(0),
+    chain_index = numeric(0),
+    train_time = numeric(0),
+    train_time_total = numeric(0),
+    test_time = numeric(0)
+  )
+  
+  all.train.test.from.model10 <- data.frame(
+    fold = numeric(0),
+    train_time = numeric(0),
+    train_time_total = numeric(0),
+    test_time = numeric(0)
+  )
+  
+  all.train.test.from.time <- data.frame(
+    fold = numeric(0),
+    train = numeric(0),
+    test = numeric(0)
+  )
+  
+  
   if(parameters$Config$Number.Chains == 1){
     
     cat("\n ONLY ONE CHAIN")
     
-    final.results = data.frame(apagar=c(0))
-    
-    final.runtime.r = data.frame()
-    final.runtime.p = data.frame()
-    final.runtime.p2 = data.frame()
-    
-    chain.model.size = data.frame(apagar=c(0))
-    total.chain.model.size = data.frame()
-    
-    runtime.chain = data.frame(apagar=c(0))
-    runtime.chain.total = data.frame()
-    
     f = 1
     while(f<=parameters$Config$Number.Folds){
       
@@ -505,79 +602,104 @@ gather.eval.python.silho <- function(parameters){
                           "/Split-", f, sep="")
       
       #########################################################################
-      
-      res.model.size = data.frame(read.csv(paste(folderSplit, 
-                                                 "/model-size.csv", sep="")))
-      res2 = data.frame(fold = f, res.model.size)
-      total.chain.model.size = rbind(total.chain.model.size, res2)
-      
-      #########################################################################
-      res.python = data.frame(read.csv(paste(folderSplit, 
-                                             "/results-python.csv", sep="")))
-      names(res.python) = c("Measures", paste0("Fold",f))
-      res.utiml = data.frame(read.csv(paste(folderSplit, 
-                                            "/results-utiml.csv", sep="")))
-      names(res.utiml) = c("Measures", paste0("Fold",f))
-      resultados = rbind(res.python, res.utiml)
-      final.results = cbind(final.results, resultados)
+      ignored.classes = data.frame(read.csv(
+        paste(folderSplit, "/ignored-classes.csv", sep="")))
+      colnames(ignored.classes)[2] = paste0("fold-",f)
+      all.ignored.classes = cbind(all.ignored.classes, ignored.classes[2])
       
       
       #########################################################################
-      res.runtime.fold = data.frame(read.csv(paste(folderSplit, 
-                                                   "/runtime-fold.csv", sep="")))
-      res.runtime.fold = data.frame(fold=f, res.runtime.fold)
-      final.runtime.r = rbind(final.runtime.r, res.runtime.fold)
-
-      #########################################################################      
-      res.runtime.python = data.frame(read.csv(paste(folderSplit, 
-                                                     "/runtime-python.csv", sep="")))
-      res2 = data.frame(fold = f, res.runtime.python)
-      runtime.chain.total = rbind(runtime.chain.total, res2)
+      model.size.from.memory = data.frame(read.csv(
+        paste(folderSplit, "/model-size-from-memory.csv", sep="")))
+      model.size.from.memory = data.frame(fold=f, model.size.from.memory )
+      all.model.size.from.memory = rbind(all.model.size.from.memory, model.size.from.memory)
+      
       
       #########################################################################
-      res.runtime.p2 = data.frame(read.csv(paste(folderSplit, 
-                                                 "/runtime-python-2.csv", sep="")))
-      res.runtime.p2 = data.frame(fold = f, res.runtime.p2)
-      final.runtime.p2 = rbind(final.runtime.p2, res.runtime.p2)
+      model.size.from.model = data.frame(read.csv(
+        paste(folderSplit, "/model-size-from-model.csv", sep="")))
+      model.size.from.model = data.frame(fold=f, model.size.from.model)
+      all.model.size.from.model = rbind(all.model.size.from.model, model.size.from.model)
+      
+      
+      #########################################################################
+      results.python = data.frame(read.csv(
+        paste(folderSplit, "/results-python.csv", sep="")))
+      names(results.python) = c("Measures", paste0("Fold",f))
+      
+      results.utiml = data.frame(read.csv(paste(
+        folderSplit, "/results-utiml.csv", sep="")))
+      names(results.utiml) = c("Measures", paste0("Fold",f))
+      
+      resultados = rbind(results.python, results.utiml)
+      all.performance = cbind(all.performance, resultados)
+      
+      
+      #########################################################################
+      runtime.fold = data.frame(read.csv(paste(
+        folderSplit, "/runtime-fold.csv", sep="")))
+      runtime.fold = data.frame(fold=f, runtime.fold)
+      all.runtime.fold = rbind(all.runtime.fold, runtime.fold)
+      
+      
+      #########################################################################
+      train.test.from.model = data.frame(read.csv(paste(
+        folderSplit, "/train-test-from-model.csv", sep="")))
+      train.test.from.model = data.frame(fold=f, train.test.from.model)
+      all.train.test.from.model = rbind(all.train.test.from.model, train.test.from.model)
+      
+      
+      #########################################################################
+      train.test.from.time = data.frame(read.csv(paste(
+        folderSplit, "/train-test-from-time.csv", sep="")))
+      train.test.from.time = data.frame(fold=f, train.test.from.time)
+      colnames(train.test.from.time) = c("fold", "train", "test")
+      all.train.test.from.time = rbind(all.train.test.from.time, train.test.from.time)
+      
       
       #################################
-      system(paste0("rm -r ", folderSplit, "/results-python.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/model-size.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/runtime-python-2.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/results-python.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/model-size.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/runtime-python-2.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep=""))
       
       f = f + 1
       gc()
-    }
+    } # fim do while
     
+    name = file.path(parameters$Folders$folderTested, "ignored-classes.csv")
+    all.ignored.classes = all.ignored.classes[,-2]
+    write.csv(all.ignored.classes, name, row.names = FALSE)
     
-    setwd(parameters$Folders$folderTested)
-    write.csv(total.chain.model.size, "chain-model-size-total.csv", row.names = FALSE)
+    name = file.path(parameters$Folders$folderTested, "model-size-from-memory.csv")
+    write.csv(all.model.size.from.memory, name, row.names = FALSE)
     
-    final.results <- final.results[, !duplicated(colnames(final.results))]
-    final.results = final.results[,-1]
-    write.csv(final.results, "performance.csv", row.names = FALSE)
+    name = file.path(parameters$Folders$folderTested, "model-size-from-model.csv")
+    all.model.size.from.model = all.model.size.from.model[,-2]
+    write.csv(all.model.size.from.model, name, row.names = FALSE)
     
-    write.csv(final.runtime.r, "runtime-R.csv", row.names = FALSE)
-    write.csv(runtime.chain.total, "runtime-chain-total.csv", row.names = FALSE)
-    write.csv(final.runtime.p2, "runtime-P2.csv", row.names = FALSE)
+    name = file.path(parameters$Folders$folderTested, "performance.csv")
+    all.performance = all.performance[, !duplicated(colnames(all.performance))]
+    all.performance = all.performance[,c(-1,-2)]
+    all.performance = data.frame(Measures, all.performance)
+    write.csv(all.performance, name, row.names = FALSE)
     
+    name = file.path(parameters$Folders$folderTested, "runtime-fold.csv")
+    write.csv(all.runtime.fold, name, row.names = FALSE)
     
-  } else {
+    name = file.path(parameters$Folders$folderTested, "train-test-from-model.csv")
+    all.train.test.from.model = all.train.test.from.model[,-2]
+    write.csv(all.train.test.from.model, name, row.names = FALSE)
+    
+    name = file.path(parameters$Folders$folderTested, "train-test-from-time.csv")
+    write.csv(all.train.test.from.time, name, row.names = FALSE)
+    
+  } else { # fim do if 
     
     cat("\n MORE THAN ONE CHAIN")
     
-    final.runtime.r = data.frame()
-    final.runtime.p = data.frame()
-    final.runtime.p2 = data.frame()
-    final.results = data.frame(apagar=c(0))
-    chain.model.size = data.frame(apagar=c(0))
-    total.chain.model.size = data.frame()
-    runtime.chain = data.frame(apagar=c(0))
-    runtime.chain.total = data.frame()
-    
     f = 1
     while(f<=parameters$Config$Number.Folds){
       
@@ -588,89 +710,103 @@ gather.eval.python.silho <- function(parameters){
                           "/Split-", f, sep="")
       
       #########################################################################
-      res.python = data.frame(read.csv(paste(folderSplit, 
-                                             "/results-python.csv", sep="")))
-      names(res.python) = c("Measures", paste0("Fold",f))
+      ignored.classes = data.frame(read.csv(
+        paste(folderSplit, "/ignored-classes.csv", sep="")))
+      colnames(ignored.classes)[2] = paste0("fold-",f)
+      all.ignored.classes = cbind(all.ignored.classes, ignored.classes[2])
+      
       
       #########################################################################
-      res.utiml = data.frame(read.csv(paste(folderSplit, 
-                                            "/results-utiml.csv", sep="")))
-      names(res.utiml) = c("Measures", paste0("Fold",f))
+      model.size.from.memory = data.frame(read.csv(
+        paste(folderSplit, "/model-size-from-memory.csv", sep="")))
+      model.size.from.memory = data.frame(fold=f, model.size.from.memory )
+      all.model.size.from.memory = rbind(all.model.size.from.memory, model.size.from.memory)
+      
       
       #########################################################################
-      resultados = rbind(res.python, res.utiml)
-      final.results = cbind(final.results, resultados)
+      model.size.from.model = data.frame(read.csv(
+        paste(folderSplit, "/model-size-from-model.csv", sep="")))
+      model.size.from.model = data.frame(fold=f, model.size.from.model)
+      res = data.frame(t(apply(model.size.from.model,2,mean)))
+      res = res[,-2]
+      all.model.size.from.model10 = rbind(all.model.size.from.model10, res)
+      
       
       #########################################################################
-      res.model.size = data.frame(read.csv(paste(folderSplit, 
-                                                 "/model-size.csv", sep="")))
-      res1 = res.model.size[c(1:parameters$Config$Number.Chains),]
-      names(res1) = c("chain_index", paste0("fold",f))
+      results.python = data.frame(read.csv(
+        paste(folderSplit, "/results-python.csv", sep="")))
+      names(results.python) = c("Measures", paste0("Fold",f))
       
-      res2 = res.model.size[parameters$Config$Number.Chains+1,] 
-      res2 = data.frame(fold = f, model_size = res2$model_size_bytes)
+      results.utiml = data.frame(read.csv(paste(
+        folderSplit, "/results-utiml.csv", sep="")))
+      names(results.utiml) = c("Measures", paste0("Fold",f))
       
-      chain.model.size = cbind(chain.model.size, res1)
-      total.chain.model.size = rbind(total.chain.model.size, res2)
+      resultados = rbind(results.python, results.utiml)
+      all.performance = cbind(all.performance, resultados)
       
-      #########################################################################
-      res.runtime.fold = data.frame(read.csv(paste(folderSplit, 
-                                                   "/runtime-fold.csv", sep="")))
-      res.runtime.fold = res.runtime.fold[,-1]
-      res.runtime.fold = data.frame(fold=f, res.runtime.fold)
-      final.runtime.r = rbind(final.runtime.r, res.runtime.fold)
       
       #########################################################################
-      res.runtime.python = data.frame(read.csv(paste(folderSplit, 
-                                                     "/runtime-python.csv", sep="")))
-      res1 = res.runtime.python[c(1:parameters$Config$Number.Chains),]
-      names(res1) = c("chain_index", paste0("train-fold",f), 
-                      paste0("test-fold",f))
+      runtime.fold = data.frame(read.csv(paste(
+        folderSplit, "/runtime-fold.csv", sep="")))
+      runtime.fold = data.frame(fold=f, runtime.fold)
+      all.runtime.fold = rbind(all.runtime.fold, runtime.fold)
       
-      res2 = res.runtime.python[parameters$Config$Number.Chains+1,] 
-      res2 = data.frame(fold = f, 
-                        train_time = res2$train_time, 
-                        test_time = res2$test_time_total)
-      
-      runtime.chain = cbind(runtime.chain, res1)
-      runtime.chain.total = rbind(runtime.chain.total, res2)
       
       #########################################################################
-      res.runtime.p2 = data.frame(read.csv(paste(folderSplit, 
-                                                 "/runtime-python-2.csv", sep="")))
-      res.runtime.p2 = data.frame(fold = f, res.runtime.p2)
-      final.runtime.p2 = rbind(final.runtime.p2, res.runtime.p2)
+      train.test.from.model = data.frame(read.csv(paste(
+        folderSplit, "/train-test-from-model.csv", sep="")))
+      train.test.from.model = data.frame(fold=f, train.test.from.model)
+      res = data.frame(t(apply(train.test.from.model,2,mean)))
+      res = res[,-2]
+      all.train.test.from.model10 = rbind(all.train.test.from.model10, res)
+      
+      
+      #########################################################################
+      train.test.from.time = data.frame(read.csv(paste(
+        folderSplit, "/train-test-from-time.csv", sep="")))
+      train.test.from.time = data.frame(fold=f, train.test.from.time)
+      colnames(train.test.from.time) = c("fold", "train", "test")
+      all.train.test.from.time = rbind(all.train.test.from.time, train.test.from.time)
+      
       
       #################################
-      system(paste0("rm -r ", folderSplit, "/results-python.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/model-size.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep=""))
-      system(paste0("rm -r ", folderSplit, "/runtime-python-2.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/results-python.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/model-size.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/runtime-python-2.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep=""))
+      #system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep=""))
       
       f = f + 1
       gc()
-    } 
+    } # fim do while
     
+    name = file.path(parameters$Folders$folderTested, "ignored-classes.csv")
+    all.ignored.classes = all.ignored.classes[,-2]
+    write.csv(all.ignored.classes, name, row.names = FALSE)
     
-    setwd(parameters$Folders$folderTested)
-    final.results <- final.results[, !duplicated(colnames(final.results))]
-    final.results = final.results[,-1]
-    write.csv(final.results, "performance.csv", row.names = FALSE)
+    name = file.path(parameters$Folders$folderTested, "model-size-from-memory.csv")
+    write.csv(all.model.size.from.memory, name, row.names = FALSE)
     
-    chain.model.size <- chain.model.size[, !duplicated(colnames(chain.model.size))]
-    chain.model.size = chain.model.size[,-1]
-    write.csv(chain.model.size, "chain-model-size.csv", row.names = FALSE)
+    name = file.path(parameters$Folders$folderTested, "model-size-from-model.csv")
+    all.model.size.from.model = all.model.size.from.model[,-2]
+    write.csv(all.model.size.from.model10, name, row.names = FALSE)
     
-    runtime.chain <- runtime.chain[, !duplicated(colnames(runtime.chain))]
-    runtime.chain = runtime.chain[,-1]
-    write.csv(runtime.chain, "runtime-chain.csv", row.names = FALSE)
+    name = file.path(parameters$Folders$folderTested, "performance.csv")
+    all.performance = all.performance[, !duplicated(colnames(all.performance))]
+    all.performance = all.performance[,c(-1,-2)]
+    all.performance = data.frame(Measures, all.performance)
+    write.csv(all.performance, name, row.names = FALSE)
     
-    write.csv(runtime.chain.total, "runtime-chain-total.csv", row.names = FALSE)
-    write.csv(total.chain.model.size, "chain-model-size-total.csv", row.names = FALSE)
-    write.csv(final.runtime.r, "runtime-R.csv", row.names = FALSE)
-    write.csv(final.runtime.p2, "runtime-P2.csv", row.names = FALSE)
+    name = file.path(parameters$Folders$folderTested, "runtime-fold.csv")
+    write.csv(all.runtime.fold, name, row.names = FALSE)
+    
+    name = file.path(parameters$Folders$folderTested, "train-test-from-model.csv")
+    all.train.test.from.model = all.train.test.from.model[,-2]
+    write.csv(all.train.test.from.model10, name, row.names = FALSE)
+    
+    name = file.path(parameters$Folders$folderTested, "train-test-from-time.csv")
+    write.csv(all.train.test.from.time, name, row.names = FALSE)
     
   }
   
@@ -680,7 +816,7 @@ gather.eval.python.silho <- function(parameters){
   cat("\n# END EVALUATED                                        #") 
   cat("\n########################################################")
   cat("\n\n\n\n")
-}
+} # fim da função
 
 
 

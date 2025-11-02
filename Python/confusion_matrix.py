@@ -1,5 +1,5 @@
 ##############################################################################
-# LABEL CLUSTERS CHAINS FOR MULTILABEL CLASSIFICATION                        #
+# STANDARD HYBRID PARTITIONS FOR MULTILABEL CLASSIFICATION                   #
 # Copyright (C) 2025                                                         #
 #                                                                            #
 # This code is free software: you can redistribute it and/or modify it under #
@@ -27,7 +27,7 @@ import sys
 import platform
 import os
 
-#FolderRoot = os.path.expanduser('/lapix/arquivos/elaine/GlobalPartitions/Python')
+#FolderRoot = os.path.expanduser('/lapix/arquivos/elaine/HPML.ECC/Python')
 #os.chdir(FolderRoot)
 #current_directory = os.getcwd()
 #sys.path.append('..')
@@ -752,20 +752,31 @@ def mlem_confusion_matrix(true_labels, pred_labels):
     # Calculate and print True Positives
     tpi = mlem_tpi(total_true_1, total_pred_1)    
 
-    # Calculate and print True Negatives
+    # # Calculate and print True Negatives
     tni = mlem_tni(total_true_0, total_pred_0)    
 
-    # Calculate and print False Positives
+    # # Calculate and print False Positives
     fpi = mlem_fpi(total_true_0, total_pred_1)
 
-    # Calculate and print False Negatives
+    # # Calculate and print False Negatives
     fni = mlem_fni(total_true_1, total_pred_0)
+
+    # tpi = mlem_tpi(true_1, pred_1)
+    # tni = mlem_tni(true_0, pred_0)
+    # fpi = mlem_fpi(true_0, pred_1)
+    # fni = mlem_fni(true_1, pred_0)
     
     # Calculate totals
     TPL = mlem_tpl(tpi)
     TNL = mlem_tnl(tni)
     FNL = mlem_fnl(fni)
     FPL = mlem_fpl(fpi)
+
+    # TPL = tpi.sum()
+    # TNL = tni.sum()
+    # FNL = fni.sum()
+    # FPL = fpi.sum()
+
 
     # Criar o DataFrame
     matrix = {
@@ -825,6 +836,3 @@ def mlem_confusion_matrix(true_labels, pred_labels):
     matrix = matrix.reset_index(drop=True)
 
     return matrix
-
-
-

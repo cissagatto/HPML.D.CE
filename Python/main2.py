@@ -45,16 +45,16 @@ importlib.reload(ms)
 
 if __name__ == '__main__':            
     
-    # =========== ARGUMENTS ===========    
+     # =========== ARGUMENTS ===========    
     """
-    train = pd.read_csv("/tmp/d-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Tr/GnegativeGO-Split-Tr-1.csv")
-    valid = pd.read_csv("/tmp/d-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Vl/GnegativeGO-Split-Vl-1.csv")
-    test = pd.read_csv("/tmp/d-GnegativeGO/Datasets/GnegativeGO/CrossValidation/Ts/GnegativeGO-Split-Ts-1.csv")
-    partitions = "/tmp/d-GnegativeGO/Partitions/GnegativeGO/Split-1/Partition-7/partition-7.csv"
-    directory = "/tmp/d-GnegativeGO/Tested/Split-1"            
+    train = pd.read_csv("/tmp/cc-GnegativeGO/Dataset/GnegativeGO/CrossValidation/Tr/GnegativeGO-Split-Tr-1.csv")
+    valid = pd.read_csv("/tmp/cc-GnegativeGO/Dataset/GnegativeGO/CrossValidation/Vl/GnegativeGO-Split-Vl-1.csv")
+    test = pd.read_csv("/tmp/cc-GnegativeGO/Dataset/GnegativeGO/CrossValidation/Ts/GnegativeGO-Split-Ts-1.csv")
+    partitions = 
+    directory = "/tmp/cc-GnegativeGO/CC/Split-1"            
     start = 1717    
     n_chains = 10    
-    """
+    """    
     
     # =========== READING DATA ===========
     train = pd.read_csv(sys.argv[1])
@@ -137,8 +137,11 @@ if __name__ == '__main__':
 
 
     # =========== SAVE MEASURES ===========   
-    metrics_df = eval.multilabel_curves_measures(y_test, pd.DataFrame(predicts, columns=labels_y_test))
-    metrics_df.to_csv(os.path.join(directory, "results-python.csv"), index=False)           
+    metrics_df, ignored_df = eval.multilabel_curve_metrics(y_test, predicts)        
+    name = (directory + "/results-python.csv") 
+    metrics_df.to_csv(name, index=False)      
+    name = (directory + "/ignored-classes.csv") 
+    ignored_df.to_csv(name, index=False)       
     
 
     # =========== SAVE MODEL SIZE EM BYTES ===========

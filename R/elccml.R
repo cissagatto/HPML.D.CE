@@ -45,13 +45,13 @@ cat("\n\n########################################################")
 ##############################################################################
 
 
-cat("\n################################")
-cat("\n# Set Work Space               #")
-cat("\n################################\n\n")
+
+cat("\n##############################")
+cat("\n# Set Work Space             #")
+cat("\n##############################\n\n")
 library(here)
 library(stringr)
 FolderRoot <- here::here()
-setwd(FolderRoot)
 
 
 
@@ -61,11 +61,14 @@ cat("\n########################################\n\n")
 options(java.parameters = "-Xmx64g")  # JAVA
 options(show.error.messages = TRUE)   # ERROR MESSAGES
 options(scipen=20)                    # number of places after the comma
+options(repos = c(CRAN = "https://cloud.r-project.org"))
 
 
-########################################
+
+cat("\n########################################")
+cat("\n# Creating parameters list             #")
+cat("\n########################################\n\n")
 parameters = list()
-########################################
 
 
 cat("\n########################################")
@@ -84,14 +87,15 @@ args <- commandArgs(TRUE)
 config_file <- args[1]
 
 
-# config_file = "~/HPML.D.CE/config-files/elcc-GpositiveGO.csv"
+# config_file = "~/HPML.D.CE/config-files/elcc-GnegativeGO-1.csv"
 
 
+parameters$Config.File$Name = config_file
 if(file.exists(config_file)==FALSE){
   cat("\n################################################################")
-  cat("#\n Missing Config File! Verify the following path:              #")
-  cat("#\n ", config_file, "                                            #")
-  cat("#################################################################\n\n")
+  cat("\n# Missing Config File! Verify the following path:              #")
+  cat("\n################################################################")
+  cat("\n --------------->", config_file)
   break
 } else {
   cat("\n########################################")
@@ -100,12 +104,17 @@ if(file.exists(config_file)==FALSE){
 }
 
 
-cat("\n##########################################################################")
-cat("\n# Config File                                                            #\n")
+cat("\n########################################")
+cat("\n# Config File                          #")
+cat("\n########################################\n\n")
 config = data.frame(read.csv(config_file))
 print(config)
-cat("\n##########################################################################\n\n")
 
+
+
+cat("\n##################################################")
+cat("\n# HPML.D.CE: Getting Parameters                  #")
+cat("\n##################################################\n\n")
 FolderScript = toString(config$Value[1])
 FolderScript = str_remove(FolderScript, pattern = " ")
 parameters$Config$FolderScript = FolderScript
@@ -158,6 +167,7 @@ ds = datasets[number_dataset,]
 parameters$DatasetInfo = ds
 
 
+
 cat("\n########################################")
 cat("\n# Loading R Sources                    #")
 cat("\n########################################\n\n")
@@ -165,17 +175,24 @@ source(file.path(parameters$Config$FolderScript, "libraries.R"))
 source(file.path(parameters$Config$FolderScript, "utils.R"))
 
 
-cat("\n########################################")
-cat("\n# Creating directories                 #")
-cat("\n########################################\n\n")
+
+cat("\n#########################################")
+cat("\n# HPML.D: Get directories               #")
+cat("\n#########################################\n\n")
 if (dir.exists(folderResults) == FALSE) {dir.create(folderResults)}
 diretorios <- directories(parameters)
 parameters$Folders = diretorios
 
+FolderE = paste(parameters$Folders$folderResults, 
+                "/Tested2", sep="")
+if(dir.exists(FolderE)==FALSE){dir.create(FolderE)}
+parameters$Folders$folderTested2 = FolderE
 
-cat("\n########################################")
-cat("\n# Checking the dataset tar.gz file     #")
-cat("\n########################################\n\n")
+
+
+cat("\n####################################################################")
+cat("\n# Checking the dataset tar.gz file                                 #")
+cat("\n####################################################################\n\n")
 str00 = paste(dataset_path, "/", ds$Name,".tar.gz", sep = "")
 str00 = str_remove(str00, pattern = " ")
 
@@ -223,9 +240,10 @@ if(file.exists(str00)==FALSE){
 }
 
 
-cat("\n######################################################")
-cat("\n# Checking the BEST HYBRID PARTITIONS tar.gz file    #")
-cat("\n######################################################\n\n")
+
+cat("\n####################################################################")
+cat("\n# Checking the BEST PARTITIONS dataset tar.gz file                 #")
+cat("\n####################################################################\n\n")
 str00 = paste(Partitions_Path, "/", ds$Name,".tar.gz", sep = "")
 str00 = str_remove(str00, pattern = " ")
 
@@ -271,6 +289,8 @@ if(file.exists(str00)==FALSE){
   }
   
 }
+
+
 
 
 if(parameters$Config$Implementation =="clus"){
@@ -324,48 +344,82 @@ if(parameters$Config$Implementation =="clus"){
 } else if(parameters$Config$Implementation=="python"){
   
   cat("\n######################################################")
-  cat("\n# RUNNING PYTHON                                     #")  
+  cat("\n# LCC + ELCC: RUNNING PYTHON                         #")  
   cat("\n######################################################\n\n")
   source(file.path(parameters$Config$FolderScript, "run-python.R"))
-  
   timeFinal <- system.time(results <- execute.run.python(parameters))
+  
+  
+  cat("\n###################################################")
+  cat("\n# LCC + ELCC: SAVE RUNTIME                        #")
+  cat("\n###################################################\n\n")
   result_set <- t(data.matrix(timeFinal))
-  setwd(parameters$Folders$folderTested)
-  write.csv(result_set, "Final-Runtime.csv", row.names = FALSE)
+  setwd(parameters$Folders$folderResults)
+  write.csv(result_set, "runtime-script.csv")
   
-  cat("\n######################################################")
-  cat("\n# COMPRESS AND COPY TO RESULTS FOLDER                #")
-  cat("\n######################################################\n\n")
-  # Pastas
-  origem  <- parameters$Folders$folderTested
-  destino <- parameters$Folders$folderReports
   
-  # Nome do dataset (vai ser o nome do arquivo)
-  nome_dataset <- parameters$DatasetInfo$Name
-  nome_arquivo <- paste0(nome_dataset, ".tar.gz")
-  arquivo_comprimido <- file.path(dirname(origem), nome_arquivo)
+  system(paste0("rm -r ", parameters$Folders$folderPartitions))
+  system(paste0("rm -r ", parameters$Folders$folderDatasets))
+  system(paste0("rm -r ", parameters$Folders$folderResults, 
+                "/", parameters$DatasetInfo$Name))
   
-  # Comprime o conteúdo da pasta, sem incluir o nome da pasta tested
-  comando_comprimir <- paste("tar -czf", arquivo_comprimido, "-C", origem, ".")
-  cat("Comprimindo:", comando_comprimir, "\n")
-  res_comprimir <- system(comando_comprimir)
   
-  if (res_comprimir != 0) {
-    stop("Erro ao comprimir")
-    quit("yes")
+  cat("\n############################################################")
+  cat("\n# LCC + ELCC: COMPRESS RESULTS                             #")
+  cat("\n############################################################\n\n")
+  base_dir <- parameters$Folders$folderResults
+  subdirs <- list.dirs(base_dir, full.names = FALSE, recursive = FALSE)
+  
+  if (length(subdirs) == 0) {
+    dirs_to_zip <- "."
+  } else {
+    dirs_to_zip <- paste(subdirs, collapse = " ")
   }
   
-  # Copia o arquivo comprimido
-  comando_copiar <- paste("cp", arquivo_comprimido, destino)
-  cat("Copiando:", comando_copiar, "\n")
-  res_copiar <- system(comando_copiar)
-  
-  if (res_copiar != 0) {
-    stop("Erro ao copiar")
-    quit("yes")
+  if(parameters$Config$Number.Chains==1){
+    output_tar <- file.path(base_dir, 
+                            paste0(parameters$DatasetInfo$Name, 
+                                   "-results-lcc.tar.gz"))
+  } else {
+    output_tar <- file.path(base_dir, 
+                            paste0(parameters$DatasetInfo$Name, 
+                                   "-results-elcc.tar.gz"))
   }
   
-  cat("Arquivo comprimido e copiado com sucesso!\n")
+  str_01 <- paste("tar -zcvf", output_tar, "-C", base_dir, dirs_to_zip)
+  res <- system(str_01)
+  
+  if (res != 0) {
+    system(paste("rm -r", base_dir))
+    print(res)
+    stop("\n\n Something went wrong in compressing results files \n\n")
+  } else {
+    cat("\n✅ Compressão concluída com sucesso!\n")
+  }
+  
+  
+  cat("\n#########################################################")
+  cat("\n# LCC + ELCC: COPY TO HOME                              #")
+  cat("\n#########################################################\n\n")
+  str0 = paste0(FolderRoot, "/Reports")
+  if(dir.exists(str0)==FALSE){dir.create(str0)}
+  
+  if(parameters$Config$Number.Chains==1){
+    str4 <- paste0(parameters$Folders$folderResults, "/",
+                   parameters$DatasetInfo$Name, "-results-lcc.tar.gz")  
+  } else {
+    str4 <- paste0(parameters$Folders$folderResults, "/",
+                   parameters$DatasetInfo$Name, "-results-elcc.tar.gz")  
+  }
+  
+  str5 = paste("cp ", str4, " ", str0, sep="")
+  res = system(str5)
+  
+  if(res!=0){
+    system(paste("rm -r ", parameters$Folders$FolderResults, sep=""))
+    print(res)
+    stop("\n\n Something went wrong in compressing results files \n\n")
+  }
   
   # destino = paste("nuvem:Clusters-Chains-HPMLs/",
   #                 parameters$Config$Implementation, "/", 

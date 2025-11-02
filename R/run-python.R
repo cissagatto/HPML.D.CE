@@ -119,7 +119,6 @@ execute.run.python <- function(parameters){
   parameters$All.Partitions = resAP
   
   
-  
   if(parameters$Config$Criteria=="maf1"){
     # 
     # cat("\n\n##########################################################")
@@ -204,25 +203,41 @@ execute.run.python <- function(parameters){
     
     
     cat("\n\n########################################################")
-    cat("\n# RUN python SILHOUETTE: Evaluation                      #")
-    cat("\n########################################################\n\n")
-    timeEvaluate = system.time(resEval <- evaluate.python.silho(parameters))
+      cat("\n# RUN python SILHOUETTE: Evaluation 1                  #")
+      cat("\n########################################################\n\n")
+    timeEvaluate = system.time(resEval <- evaluate.python.silho(parameters, 
+                                                                folder = parameters$Folders$folderTested))
     
     
     cat("\n\n########################################################")
-    cat("\n# RUN python SILHOUETTE: Mean 10 Folds                   #")
+    cat("\n# RUN python SILHOUETTE: Evaluation 2                  #")
     cat("\n########################################################\n\n")
-    timeGather = system.time(resGE <- gather.eval.python.silho(parameters))
+    timeEvaluate = system.time(resEval <- evaluate.python.silho(parameters,
+                                                                folder = parameters$Folders$folderTested2))
     
     
-    cat("\n\n#######################################################")
-    cat("\n# RUN python SILHOUETTE: Save Runtime                   #")
-    cat("\n#######################################################\n\n")
-    timesExecute = rbind(timeAllPartitions, timeLabelSpace, 
-                         timeBuild, timeEvaluate, timeGather)
-    setwd(parameters$Folders$folderTested)
-    write.csv(timesExecute, "Runtime-R-Per-Function.csv")
+    cat("\n\n########################################################")
+      cat("\n# RUN python SILHOUETTE: gather 1                      #")
+      cat("\n########################################################\n\n")
+    timeGather = system.time(resGE <- gather.eval.python.silho(parameters,
+                                                               folder = parameters$Folders$folderTested))
     
+    
+    cat("\n\n########################################################")
+    cat("\n# RUN python SILHOUETTE: gather 2                      #")
+    cat("\n########################################################\n\n")
+    timeGather = system.time(resGE <- gather.eval.python.silho(parameters,
+                                                               folder = parameters$Folders$folderTested2))
+    
+    
+    # cat("\n\n#######################################################")
+    # cat("\n# RUN python SILHOUETTE: Save Runtime                   #")
+    # cat("\n#######################################################\n\n")
+    # timesExecute = rbind(timeAllPartitions, timeLabelSpace, 
+    #                      timeBuild, timeEvaluate, timeGather)
+    # setwd(parameters$Folders$folderTested)
+    # write.csv(timesExecute, "Runtime-R-Per-Function.csv")
+    # 
   }
   
   

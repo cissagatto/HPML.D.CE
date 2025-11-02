@@ -1,5 +1,5 @@
 ##############################################################################
-# LABEL CLUSTERS CHAINS FOR MULTILABEL CLASSIFICATION                        #
+# STANDARD HYBRID PARTITIONS FOR MULTILABEL CLASSIFICATION                   #
 # Copyright (C) 2025                                                         #
 #                                                                            #
 # This code is free software: you can redistribute it and/or modify it under #
@@ -29,10 +29,16 @@ import sys
 import platform
 import os
 
-#FolderRoot = os.path.expanduser('/lapix/arquivos/elaine/GlobalPartitions/Python')
+#FolderRoot = os.path.expanduser('/lapix/arquivos/elaine/HPML.ECC/Python')
 #os.chdir(FolderRoot)
 #current_directory = os.getcwd()
 #sys.path.append('..')
+
+from collections import Counter
+from sklearn.utils.multiclass import type_of_target
+
+import warnings
+from sklearn.exceptions import UndefinedMetricWarning
 
 
 import pandas as pd
@@ -47,11 +53,127 @@ from sklearn.metrics import (
 import confusion_matrix as cm
 import measures as ms
 
-from collections import Counter
-from sklearn.utils.multiclass import type_of_target
 
-import warnings
-from sklearn.exceptions import UndefinedMetricWarning
+########################################################################
+#                                                                      #
+########################################################################
+def multilabel_ranking_measures(true_labels: pd.DataFrame, pred_scores: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculates various ranking-based evaluation metrics for multi-label classification.
+
+    Parameters:
+    ----------
+    true_labels (pd.DataFrame): The DataFrame containing the true binary labels for each instance.
+
+    pred_scores (pd.DataFrame): The DataFrame containing the predicted scores for each label.
+
+    Returns:
+    -------
+    pd.DataFrame
+        A DataFrame containing the computed ranking-based metrics.
+
+    Metrics Computed:
+    ------------------
+    - Average Precision
+    - Coverage Error
+    - Is Error
+    - Margin Loss
+    - Ranking Error
+    - Ranking Loss
+    - One Error
+
+    Interpretation:
+    ----------------
+    1. **Average Precision**
+        Definition: Measures the quality of the ranking of predicted labels. It is the average of the 
+        precision scores calculated at each position in the ranked list of predictions, weighted by 
+        the number of relevant items found.
+        - A value of 1.0 indicates perfect ranking where all relevant labels are ranked above all 
+          irrelevant labels for every instance.
+        - Lower values indicate that the model is not effectively ranking all relevant labels before 
+          irrelevant ones.
+
+    2. **Coverage Error**
+        Definition: Measures the average number of labels that need to be checked before finding all 
+        relevant labels for each instance.
+        - A value of 3.5 indicates that, on average, you need to check 3.5 labels to find all relevant 
+          labels.
+        - Lower values are preferable as they suggest that fewer labels need to be checked to find all 
+          relevant ones, indicating better model performance.
+
+    3. **Is Error**
+        Definition: Indicates whether there is any discrepancy between the predicted ranking and the true 
+        ranking. 
+        - A value of 1.0 suggests that there is an error in the ranking, meaning that the predicted 
+          ranking does not match the true ranking exactly.
+        - A value of 0.0 indicates that the predicted ranking matches the true ranking exactly.
+
+    4. **Margin Loss**
+        Definition: Measures the average number of positions by which positive labels are ranked below 
+        negative labels. 
+        - A Margin Loss value of 1.25 indicates that, on average, positive labels are ranked 1.25 
+          positions below negative labels.
+        - Lower values are preferable as they suggest that positive labels are ranked closer to the top 
+          compared to negative labels.
+
+    5. **Ranking Error**
+        Definition: Calculates the sum of squared differences between the predicted and true rankings. 
+        - A value of 9.5 indicates the total magnitude of the ranking errors.
+        - Lower values are better, indicating that the predicted ranking is closer to the true ranking.
+
+    6. **Ranking Loss**
+        Definition: Measures the fraction of label pairs where the ranking is incorrect. 
+        - A value of approximately 0.67 indicates that about 67% of label pairs are ranked incorrectly.
+        - Lower values are preferred, indicating that the majority of label pairs are ranked correctly.
+
+    7. **One Error**
+        Definition: Measures the proportion of instances where the highest-ranked label is not in the set 
+        of true labels.
+        - A value of 0.0 indicates that for every instance, the highest-ranked label is always a true label.
+        - A value of 1.0 indicates that for every instance, the highest-ranked label is never a true label.
+        - Lower values are better, indicating that the model is effective at ranking at least one relevant
+        label as the highest-ranked label for each instance.
+
+    References:
+    ----------
+    - The metrics used are commonly referenced in multi-label ranking evaluation literature and libraries.
+    - For detailed explanations, see the respective methods in the `ms` (multi-label metrics) library 
+    documentation and scikit-learn documentation for `label_ranking_loss` and `coverage_error`.
+
+    Examples:
+    ----------
+    >>> true_labels = pd.DataFrame([[1, 0, 0], [0, 1, 1], [1, 1, 0]], columns=['A', 'B', 'C'])
+    >>> pred_scores = pd.DataFrame([[0.2, 0.5, 0.3], [0.4, 0.2, 0.6], [0.7, 0.1, 0.2]], columns=['A', 'B', 'C'])
+    >>> result_df = multilabel_ranking_measures(true_labels, pred_scores)
+    >>> print(result_df)
+    """
+    
+    # Compute the various ranking metrics
+    average_precision = ms.mlem_average_precision(true_labels, pred_scores)
+    precision_atk = ms.mlem_precision_at_k(true_labels, pred_scores)
+    coverage = coverage_error(true_labels, pred_scores)
+    iserror = ms.mlem_is_error(true_labels, pred_scores)
+    margin_loss = ms.mlem_margin_loss(true_labels, pred_scores)       
+    ranking_error = ms.mlem_ranking_error(true_labels, pred_scores)       
+    ranking_loss = label_ranking_loss(true_labels, pred_scores)       
+    one_error = ms.mlem_one_error(true_labels, pred_scores)
+
+    # Store all metrics in a dictionary
+    metrics_dict = {    
+        'average_precision': average_precision,
+        'coverage': coverage,
+        'is_error': iserror,
+        'margin_loss': margin_loss,
+        'precision_atk': precision_atk,
+        'ranking_error': ranking_error,
+        'ranking_loss': ranking_loss,    
+        'one_error': one_error
+    }
+
+    # Convert dictionary to DataFrame
+    metrics_df = pd.DataFrame(list(metrics_dict.items()), columns=['Measure', 'Value'])
+
+    return metrics_df
 
 
 ########################################################################
@@ -313,8 +435,12 @@ def multilabel_bipartition_measures(true_labels: pd.DataFrame, pred_labels: pd.D
 
     # Basic metrics
     accuracy_mlem = ms.mlem_accuracy(true_labels, pred_labels)
-    hamming_l = hamming_loss(np.array(true_labels), np.array(pred_labels))    
-    zol = zero_one_loss(np.array(true_labels), np.array(pred_labels))    
+    
+    # Convert probabilities to binary
+    pred_labels_bin = (pred_labels.values >= 0.5).astype(int)
+    true_labels_bin = true_labels.values.astype(int)
+    hamming_l = hamming_loss(np.array(true_labels_bin), np.array(pred_labels_bin))    
+    zol = zero_one_loss(np.array(true_labels_bin), np.array(pred_labels_bin))    
     sa = ms.mlem_subset_accuracy(true_labels, pred_labels)
 
     # Precision Scores
@@ -386,6 +512,7 @@ def multilabel_bipartition_measures(true_labels: pd.DataFrame, pred_labels: pd.D
     metrics_df = pd.DataFrame(list(metrics_dict.items()), columns=['Measure', 'Value'])
 
     return metrics_df
+
 
 
 
@@ -485,135 +612,9 @@ def multilabel_curves_measures(true_labels: pd.DataFrame, pred_scores: pd.DataFr
     return metrics_df
 
 
-
-########################################################################
-#                                                                      #
-########################################################################
-def multilabel_ranking_measures(true_labels: pd.DataFrame, pred_scores: pd.DataFrame) -> pd.DataFrame:
-    """
-    Calculates various ranking-based evaluation metrics for multi-label classification.
-
-    Parameters:
-    ----------
-    true_labels (pd.DataFrame): The DataFrame containing the true binary labels for each instance.
-
-    pred_scores (pd.DataFrame): The DataFrame containing the predicted scores for each label.
-
-    Returns:
-    -------
-    pd.DataFrame
-        A DataFrame containing the computed ranking-based metrics.
-
-    Metrics Computed:
-    ------------------
-    - Average Precision
-    - Coverage Error
-    - Is Error
-    - Margin Loss
-    - Ranking Error
-    - Ranking Loss
-    - One Error
-
-    Interpretation:
-    ----------------
-    1. **Average Precision**
-        Definition: Measures the quality of the ranking of predicted labels. It is the average of the 
-        precision scores calculated at each position in the ranked list of predictions, weighted by 
-        the number of relevant items found.
-        - A value of 1.0 indicates perfect ranking where all relevant labels are ranked above all 
-          irrelevant labels for every instance.
-        - Lower values indicate that the model is not effectively ranking all relevant labels before 
-          irrelevant ones.
-
-    2. **Coverage Error**
-        Definition: Measures the average number of labels that need to be checked before finding all 
-        relevant labels for each instance.
-        - A value of 3.5 indicates that, on average, you need to check 3.5 labels to find all relevant 
-          labels.
-        - Lower values are preferable as they suggest that fewer labels need to be checked to find all 
-          relevant ones, indicating better model performance.
-
-    3. **Is Error**
-        Definition: Indicates whether there is any discrepancy between the predicted ranking and the true 
-        ranking. 
-        - A value of 1.0 suggests that there is an error in the ranking, meaning that the predicted 
-          ranking does not match the true ranking exactly.
-        - A value of 0.0 indicates that the predicted ranking matches the true ranking exactly.
-
-    4. **Margin Loss**
-        Definition: Measures the average number of positions by which positive labels are ranked below 
-        negative labels. 
-        - A Margin Loss value of 1.25 indicates that, on average, positive labels are ranked 1.25 
-          positions below negative labels.
-        - Lower values are preferable as they suggest that positive labels are ranked closer to the top 
-          compared to negative labels.
-
-    5. **Ranking Error**
-        Definition: Calculates the sum of squared differences between the predicted and true rankings. 
-        - A value of 9.5 indicates the total magnitude of the ranking errors.
-        - Lower values are better, indicating that the predicted ranking is closer to the true ranking.
-
-    6. **Ranking Loss**
-        Definition: Measures the fraction of label pairs where the ranking is incorrect. 
-        - A value of approximately 0.67 indicates that about 67% of label pairs are ranked incorrectly.
-        - Lower values are preferred, indicating that the majority of label pairs are ranked correctly.
-
-    7. **One Error**
-        Definition: Measures the proportion of instances where the highest-ranked label is not in the set 
-        of true labels.
-        - A value of 0.0 indicates that for every instance, the highest-ranked label is always a true label.
-        - A value of 1.0 indicates that for every instance, the highest-ranked label is never a true label.
-        - Lower values are better, indicating that the model is effective at ranking at least one relevant
-        label as the highest-ranked label for each instance.
-
-    References:
-    ----------
-    - The metrics used are commonly referenced in multi-label ranking evaluation literature and libraries.
-    - For detailed explanations, see the respective methods in the `ms` (multi-label metrics) library 
-    documentation and scikit-learn documentation for `label_ranking_loss` and `coverage_error`.
-
-    Examples:
-    ----------
-    >>> true_labels = pd.DataFrame([[1, 0, 0], [0, 1, 1], [1, 1, 0]], columns=['A', 'B', 'C'])
-    >>> pred_scores = pd.DataFrame([[0.2, 0.5, 0.3], [0.4, 0.2, 0.6], [0.7, 0.1, 0.2]], columns=['A', 'B', 'C'])
-    >>> result_df = multilabel_ranking_measures(true_labels, pred_scores)
-    >>> print(result_df)
-    """
-    
-    # Compute the various ranking metrics
-    average_precision = ms.mlem_average_precision(true_labels, pred_scores)
-    precision_atk = ms.mlem_precision_at_k(true_labels, pred_scores)
-    coverage = coverage_error(true_labels, pred_scores)
-    iserror = ms.mlem_is_error(true_labels, pred_scores)
-    margin_loss = ms.mlem_margin_loss(true_labels, pred_scores)       
-    ranking_error = ms.mlem_ranking_error(true_labels, pred_scores)       
-    ranking_loss = label_ranking_loss(true_labels, pred_scores)       
-    one_error = ms.mlem_one_error(true_labels, pred_scores)
-
-    # Store all metrics in a dictionary
-    metrics_dict = {    
-        'average_precision': average_precision,
-        'coverage': coverage,
-        'is_error': iserror,
-        'margin_loss': margin_loss,
-        'precision_atk': precision_atk,
-        'ranking_error': ranking_error,
-        'ranking_loss': ranking_loss,    
-        'one_error': one_error
-    }
-
-    # Convert dictionary to DataFrame
-    metrics_df = pd.DataFrame(list(metrics_dict.items()), columns=['Measure', 'Value'])
-
-    return metrics_df
-
-
-
-
-
-########################################################################
-#                                                                      #
-########################################################################
+#=================================================================#
+# ROBUST MULITLABEL METRIC - RETURNS IGNORED CLASSES IN A DF      #
+#=================================================================#
 def robust_multilabel_metric(y_true, y_scores, metric_func, average='macro', class_names=None, verbose=True):
     """
     Compute robust multilabel evaluation metrics, ignoring classes with undefined behavior.
@@ -673,68 +674,122 @@ def robust_multilabel_metric(y_true, y_scores, metric_func, average='macro', cla
     Notes
     -----
     Author: Mauri Ferrandin and Elaine Cecília Gatto
-    """
+    """    
+
+    # Initialize list to store ignored class names (those with only one label type)
     ignored_classes = []
+
+    # List to collect valid per-class metric scores
     valid_scores = []
 
+    # Get the number of classes (columns in y_true)
     n_classes = y_true.shape[1]
 
+    # Iterate over each class (column)
     for i in range(n_classes):
+
+        # Extract the true labels and predicted scores for the current class
         true_col = y_true[:, i]
         pred_col = y_scores[:, i]
 
+        #-------------------------------------------------------------------#
+        # Check if the class has both positive and negative samples
+        #-------------------------------------------------------------------#
         if len(np.unique(true_col)) < 2:
+
+            # Determine the class name (use provided or default)
             class_label = class_names[i] if class_names else f"Class {i}"
+
+            # Add this class to the ignored list
             ignored_classes.append(class_label)
+
+            # Optionally print a warning message
             if verbose:
                 print(f"⚠️ Class '{class_label}' ignored: only one class present in true labels.")
             continue
 
+
+        #-------------------------------------------------------------------#
+        # 
+        #-------------------------------------------------------------------#
         try:
+            # Temporarily suppress warnings about undefined metrics
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 warnings.simplefilter("ignore", category=UndefinedMetricWarning)
+                 
+                # --------> Compute the metric for this class <--------
                 score_i = metric_func(true_col, pred_col)
+            
+            # Store the valid score
             valid_scores.append(score_i)
-        except ValueError:
+
+        except ValueError:            
+            # Handle exceptions raised by the metric function
             class_label = class_names[i] if class_names else f"Class {i}"
             ignored_classes.append(class_label)
             if verbose:
                 print(f"⚠️ Class '{class_label}' ignored due to error when computing the metric.")
 
+    
+    #-------------------------------------------------------------------#
+    # If no valid classes remain, return NaN and the ignored list
+    #-------------------------------------------------------------------#
     if not valid_scores:
         if verbose:
             print(f"⚠️ Metric '{metric_func.__name__}' with '{average}' averaging failed: no valid classes.")
         return np.nan, ignored_classes
+    
 
+    #-------------------------------------------------------------------#
+    # Handle averaging options
+    #-------------------------------------------------------------------#
+
+    # --->  1. Macro average: mean of all valid per-class scores
     if average == 'macro':
         return np.mean(valid_scores), ignored_classes
+    
+    # --->  2. Weighted average: mean weighted by class support (number of positives)
     elif average == 'weighted':
+        # Compute supports for valid classes only
         supports = [np.sum(y_true[:, i]) for i in range(n_classes) if len(np.unique(y_true[:, i])) > 1]
+        
+        # Total number of positive labels across valid classes
         total_support = np.sum(supports)
+        
+        # Compute normalized weights
         weights = [s / total_support for s in supports]
+
+        # Weighted average of scores
         return np.average(valid_scores, weights=weights), ignored_classes
+    
+    # ---> 3. Samples average: compute per-sample metric then average
     elif average == 'samples':
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
+                # Compute the sample-based average directly using the metric function
                 return metric_func(y_true, y_scores, average='samples'), ignored_classes
         except ValueError:
+            # Return NaN if computation fails
             return np.nan, ignored_classes
+    
+    # ---> 4. Micro average: aggregate all predictions and compute a global metric
     elif average == 'micro':
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
+                # Compute the micro-averaged score
                 return metric_func(y_true, y_scores, average='micro'), ignored_classes
         except ValueError:
+            # Return NaN if the computation fails
             return np.nan, ignored_classes
+    
+    
 
-
-
-
-########################################################################
-#                                                                      #
-########################################################################
+#=================================================================#
+# MULTILABEL CURVE METRICS - CALLS ROBUST MULTILABEL METRIC       #
+#=================================================================#
 def multilabel_curve_metrics(true_labels: pd.DataFrame, predicted_scores: pd.DataFrame):
     """
     Compute multilabel curve-based evaluation metrics (AUPRC and ROC AUC) with support 
@@ -786,7 +841,6 @@ def multilabel_curve_metrics(true_labels: pd.DataFrame, predicted_scores: pd.Dat
     """
     metrics_data = []
     ignored_data = []
-
     class_names = true_labels.columns.tolist()
 
     for metric_func, metric_name in [
@@ -817,3 +871,66 @@ def multilabel_curve_metrics(true_labels: pd.DataFrame, predicted_scores: pd.Dat
     ignored_df = pd.DataFrame(ignored_data)
 
     return metrics_df, ignored_df
+
+
+########################################################################
+#                                                                      #
+########################################################################
+def safe_predict_proba_ecc(model, X_test, Y_test):
+    """
+    Safely computes class probabilities for ECC (Ensemble of Classifier Chains),
+    handling cases where some classifiers were trained on a single class only.
+
+    This avoids IndexError from ClassifierChain.predict_proba() when only one class was seen
+    during training, by assuming a constant probability of 0 or 1 based on the single class.
+
+    Parameters
+    ----------
+    model : ECC
+        A fitted ECC model containing multiple sklearn.multioutput.ClassifierChain chains.
+    
+    X_test : pandas.DataFrame or np.ndarray
+        Feature matrix for prediction.
+    
+    Y_test : pandas.DataFrame
+        names of the labels.
+
+    Returns
+    -------
+    prob_df : pandas.DataFrame
+        Averaged predicted probabilities over all chains, shape (n_samples, n_labels).
+
+    Example
+    -------
+    >>> proba = safe_predict_proba_ecc(model, X_test, Y_train)
+    >>> proba.to_csv("y_pred_proba.csv", index=False)
+
+    Author: [Seu Nome]
+    """
+    import numpy as np
+    import pandas as pd
+
+    all_chain_probas = []
+
+    for chain_idx, chain in enumerate(model.chains):
+        n_samples = X_test.shape[0]
+        n_labels = Y_test.shape[1]
+        probas = np.zeros((n_samples, n_labels))
+        X_aug = X_test.values
+
+        for idx, estimator in enumerate(chain.estimators_):
+            if idx > 0:
+                X_aug = np.hstack((X_test.values, probas[:, :idx]))
+
+            proba = estimator.predict_proba(X_aug)
+
+            if proba.shape[1] == 2:
+                probas[:, idx] = proba[:, 1]
+            else:
+                label_class = estimator.classes_[0]
+                probas[:, idx] = 1.0 if label_class == 1 else 0.0
+
+        all_chain_probas.append(probas)
+
+    mean_proba = np.mean(all_chain_probas, axis=0)
+    return pd.DataFrame(mean_proba, columns=Y_test.columns)

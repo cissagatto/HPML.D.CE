@@ -140,7 +140,7 @@ while(p<=length(Implementation.1)){
           cat("\n\t", Criteria.1[w])
           cat("\n\t", ds$Name)
           
-          name = paste("elcc-", ds$Name, sep="")  
+          name = paste("lcc-", ds$Name, sep="")  
           
           file.name = paste(FolderCF, "/", name, ".csv", sep="")
           
@@ -185,7 +185,7 @@ while(p<=length(Implementation.1)){
           
           write("Number_Cores, 10", file = output.file, append = TRUE)
           
-          write("Number_Chains, 10", file = output.file, append = TRUE)
+          write("Number_Chains, 1", file = output.file, append = TRUE)
           
           close(output.file)
           

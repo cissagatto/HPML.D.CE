@@ -171,24 +171,24 @@ build.python.silho <- function(parameters){
       message("\n\n PYTHON RAN OK! \n\n")
     }
     
-    str.execute = paste("python3 ", parameters$Folders$folderPython,
-                        "/main2.py ",
-                        train.name.file.csv, " ",
-                        val.name.file.csv,  " ",
-                        test.name.file.csv, " ",
-                        partition.csv.name, " ",
-                        Folder.Tested.Split.2, " ",
-                        Number.Chains = parameters$Config$Number.Chains,
-                        #fold = f,
-                        sep="")
-    
-    res = system(str.execute)
-    if(res!=0){
-      system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
-      stop("\n\n Something went wrong in python VERSION 2\n\n")
-    } else {
-      message("\n\n PYTHON RAN OK! \n\n")
-    }
+    # str.execute = paste("python3 ", parameters$Folders$folderPython,
+    #                     "/main2.py ",
+    #                     train.name.file.csv, " ",
+    #                     val.name.file.csv,  " ",
+    #                     test.name.file.csv, " ",
+    #                     partition.csv.name, " ",
+    #                     Folder.Tested.Split.2, " ",
+    #                     Number.Chains = parameters$Config$Number.Chains,
+    #                     #fold = f,
+    #                     sep="")
+    # 
+    # res = system(str.execute)
+    # if(res!=0){
+    #   system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+    #   stop("\n\n Something went wrong in python VERSION 2\n\n")
+    # } else {
+    #   message("\n\n PYTHON RAN OK! \n\n")
+    # }
     
     # f = f + 1
     gc()
@@ -290,26 +290,21 @@ evaluate.python.silho <- function(parameters, folder){
     y_pred_proba = sapply(y_pred_proba, function(x) as.numeric(as.character(x)))
     
     
-    ########################################################################
+    # ########################################################################
     y_threshold_05 <- data.frame(as.matrix(fixed_threshold(y_pred_proba,
                                                            threshold = 0.5)))
-    write.csv(y_threshold_05, 
+    write.csv(y_threshold_05,
               paste(Folder.Tested.Split, "/y_pred_thr05.csv", sep=""),
               row.names = FALSE)
-    
+
     ########################################################################
-    y_threshold_card = lcard_threshold(as.matrix(y_pred_proba), 
+    y_threshold_card = lcard_threshold(as.matrix(y_pred_proba),
                                        mldr.tv$measures$cardinality,
                                        probability = F)
-    write.csv(y_threshold_card, 
+    write.csv(y_threshold_card,
               paste(Folder.Tested.Split, "/y_pred_thrLC.csv", sep=""),
               row.names = FALSE)
-    
-    ##########################################################################    
-    avaliacao(f = f, y_true = y.true.3, y_pred = y_pred_proba,
-              salva = Folder.Tested.Split, nome = "results-utiml")
-    
-    
+
     ##########################################################################    
     avaliacao(f = f, y_true = y.true.3, y_pred = y_pred_proba,
               salva = Folder.Tested.Split, nome = "results-utiml")
@@ -327,6 +322,27 @@ evaluate.python.silho <- function(parameters, folder){
                 y_proba = y_pred_proba,
                 Folder = Folder.Tested.Split, 
                 nome = paste(Folder.Tested.Split, "/results-r.csv", sep=""))
+    
+    #########################################################################
+    name.true = paste0(Folder.Tested.Split, "/y_true.csv")
+    name.proba = paste0(Folder.Tested.Split, "/y_pred_proba.csv")
+    
+    str.execute = paste("python3 ", parameters$Folders$folderPython,
+                        "/curves.py ", 
+                        name.true, " ", 
+                        name.proba, " ", 
+                        Folder.Tested.Split, " ", 
+                        sep = "")
+    res = system(str.execute)
+    
+    if(res!=0){
+      #system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+      #stop("\n\n Something went wrong in python\n\n")
+      message("\n\n Something went wrong in python \n\n")
+    } else {
+      message("\n\n PYTHON RAN OK! \n\n")
+    }
+    
     
     # f = f + 1
     gc()

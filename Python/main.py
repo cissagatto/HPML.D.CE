@@ -42,6 +42,9 @@ importlib.reload(eval)
 import measures as ms
 importlib.reload(ms)
 
+import ml_auprc_roc as curve
+importlib.reload(curve)
+
 
 if __name__ == '__main__':            
     
@@ -68,10 +71,10 @@ if __name__ == '__main__':
 
 
     print("\n\n%==============================================%")
-    print("train: ", sys.argv[1])
-    print("valid: ", sys.argv[2])
-    print("test: ", sys.argv[3])
-    print("partitions: ", sys.argv[4])
+    #print("train: ", sys.argv[1])
+    #print("valid: ", sys.argv[2])
+    #print("test: ", sys.argv[3])
+    #print("partitions: ", sys.argv[4])
     print("directory: ", sys.argv[5])
     print("n_chains: ", sys.argv[6])    
     print("%==============================================%\n\n")    
@@ -126,6 +129,8 @@ if __name__ == '__main__':
     # ======= SALVANDO OS CSVS =======            
     y_test.to_csv(true_name, index=False)
     predicts.to_csv(proba_name, index=False)
+    true = y_test
+    pred = predicts
 
 
     # ======= SAVE TIME =======    
@@ -136,11 +141,6 @@ if __name__ == '__main__':
     df_timing.to_csv(os.path.join(directory, "runtime-python.csv"), index=False)
 
 
-    # =========== SAVE MEASURES ===========   
-    metrics_df = eval.multilabel_curves_measures(y_test, pd.DataFrame(predicts, columns=labels_y_test))
-    metrics_df.to_csv(os.path.join(directory, "results-python.csv"), index=False)           
-    
-
     # =========== SAVE MODEL SIZE EM BYTES ===========
     model_buffer = io.BytesIO()
     pickle.dump(model, model_buffer)
@@ -149,52 +149,5 @@ if __name__ == '__main__':
         'model_size_bytes': [model_size_bytes]
     })
     model_size_df.to_csv(os.path.join(directory, "model-size.csv"), index=False)   
-
     
-    """
-    # =========== SAVE RUNTIME ===========   
-    df_times = pd.DataFrame({
-        'chain_index': list(range(len(model.chain_train_times))),
-        'train_time': model.chain_train_times,
-        'train_time_total': model.train_time_total,
-        'test_time': model.test_time_total
-    })
-    name = (directory + "/train-test-from-model.csv")     
-    df_times.to_csv(name, index=False)  
-
-
-    # =========== SAVE PREDICTIONS ===========   
-    # probas_df = pd.DataFrame(proba, columns=labels_y_test)
-    probas_path = os.path.join(directory, "y_proba.csv")
-    proba.to_csv(probas_path, index=False)   
     
-    #bin_path = os.path.join(directory, "y_bin.csv")
-    #bin.to_csv(bin_path, index=False)   
-
-    y_test.to_csv(os.path.join(directory, 'y_true.csv'), index=False)
-
-
-    # =========== SAVE MEASURES ===========   
-    metrics_df, ignored_df = eval.multilabel_curve_metrics(y_test, proba)    
-    name = (directory + "/results-python.csv") 
-    metrics_df.to_csv(name, index=False)  
-    name = (directory + "/ignored-classes.csv") 
-    ignored_df.to_csv(name, index=False)         
-
-    
-    # =========== SAVE MODEL SIZE ===========   
-    df_sizes = pd.DataFrame({
-        'chain_index': list(range(len(modelo.chain_model_sizes))),
-        'chain_model_size': modelo.chain_model_sizes,
-        'total_model_size': modelo.total_model_size
-    })        
-    name = (directory + "/model-size-from-model.csv")     
-    df_sizes.to_csv(name, index=False)
-
-    size = len(pickle.dumps(modelo))
-    df_size = pd.DataFrame({        
-        "size_bytes": [size]
-    })
-    name = (directory + "/model-size-from-memory.csv")     
-    df_size.to_csv(name, index=False)
-    """

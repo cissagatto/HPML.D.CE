@@ -88,6 +88,7 @@ config_file <- args[1]
 
 
 # config_file = "~/HPML.D.CE/config-files/elcc-GnegativeGO-1.csv"
+# config_file = "~/HPML.D.CE/config-files/lcc-GnegativeGO-1.csv"
 
 
 parameters$Config.File$Name = config_file
@@ -363,36 +364,64 @@ if(parameters$Config$Implementation =="clus"){
   system(paste0("rm -r ", parameters$Folders$folderResults, 
                 "/", parameters$DatasetInfo$Name))
   
+  system(paste0("rm -r ", parameters$Folders$folderResults, "/Tested2"))
+  
   
   cat("\n############################################################")
   cat("\n# LCC + ELCC: COMPRESS RESULTS                             #")
   cat("\n############################################################\n\n")
-  base_dir <- parameters$Folders$folderResults
-  subdirs <- list.dirs(base_dir, full.names = FALSE, recursive = FALSE)
+  # base_dir <- parameters$Folders$folderResults
+  # subdirs <- list.dirs(base_dir, full.names = FALSE, recursive = FALSE)
+  # 
+  # if (length(subdirs) == 0) {
+  #   dirs_to_zip <- "."
+  # } else {
+  #   dirs_to_zip <- paste(subdirs, collapse = " ")
+  # }
+  # 
+  # if(parameters$Config$Number.Chains==1){
+  #   output_tar <- file.path(base_dir, 
+  #                           paste0(parameters$DatasetInfo$Name, 
+  #                                  "-results-lcc.tar.gz"))
+  # } else {
+  #   output_tar <- file.path(base_dir, 
+  #                           paste0(parameters$DatasetInfo$Name, 
+  #                                  "-results-elcc.tar.gz"))
+  # }
+  # 
+  # str_01 <- paste("tar -zcvf", output_tar, "-C", base_dir, dirs_to_zip)
+  # res <- system(str_01)
+  # 
+  # if (res != 0) {
+  #   system(paste("rm -r", base_dir))
+  #   print(res)
+  #   stop("\n\n Something went wrong in compressing results files \n\n")
+  # } else {
+  #   cat("\n✅ Compressão concluída com sucesso!\n")
+  # }
   
-  if (length(subdirs) == 0) {
-    dirs_to_zip <- "."
-  } else {
-    dirs_to_zip <- paste(subdirs, collapse = " ")
-  }
   
-  if(parameters$Config$Number.Chains==1){
-    output_tar <- file.path(base_dir, 
-                            paste0(parameters$DatasetInfo$Name, 
-                                   "-results-lcc.tar.gz"))
-  } else {
-    output_tar <- file.path(base_dir, 
-                            paste0(parameters$DatasetInfo$Name, 
-                                   "-results-elcc.tar.gz"))
-  }
+  # base_dir   <- "/tmp/d-GnegativeGO/Tested"
+  base_dir   <- parameters$Folders$folderTested
   
-  str_01 <- paste("tar -zcvf", output_tar, "-C", base_dir, dirs_to_zip)
-  res <- system(str_01)
+   if(parameters$Config$Number.Chains==1){
+     output_tar <- paste0(parameters$Folders$folderResults, "/",
+                          parameters$DatasetInfo$Name, 
+                          "-results-lcc.tar.gz")
+   } else {
+     output_tar <- paste0(parameters$Folders$folderResults, "/",
+                          parameters$DatasetInfo$Name,
+                          "-results-elcc.tar.gz")
+   }
+  
+  
+  cmd <- paste("tar -zcvf", output_tar, "-C", base_dir, ".")
+  res = system(cmd)
   
   if (res != 0) {
-    system(paste("rm -r", base_dir))
-    print(res)
-    stop("\n\n Something went wrong in compressing results files \n\n")
+    #system(paste("rm -r", base_dir))
+    #print(res)
+    message("\n\n Something went wrong in compressing results files \n\n")
   } else {
     cat("\n✅ Compressão concluída com sucesso!\n")
   }
@@ -416,9 +445,9 @@ if(parameters$Config$Implementation =="clus"){
   res = system(str5)
   
   if(res!=0){
-    system(paste("rm -r ", parameters$Folders$FolderResults, sep=""))
-    print(res)
-    stop("\n\n Something went wrong in compressing results files \n\n")
+    #system(paste("rm -r ", parameters$Folders$FolderResults, sep=""))
+    #print(res)
+    message("\n\n Something went wrong in compressing results files \n\n")
   }
   
   # destino = paste("nuvem:Clusters-Chains-HPMLs/",

@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
     # =========== PREDICT ===========
     start_time_test_bin = time.time()
-    predicts = pd.DataFrame(model.predict(x_test))
+    predicts = pd.DataFrame(model.predict2(x_test))
     end_time_test_bin = time.time()
     testing = end_time_test_bin - start_time_test_bin   
 

@@ -1,0 +1,14 @@
+Config, Value
+FolderScripts, ~/HPML.D.CE/R
+Dataset_Path, ~/HPML.D.CE/Datasets
+Temporary_Path, /tmp/lcc-GnegativeGO
+Partitions_Path, ~/HPML.D.CE/Best-Partitions
+Implementation, python
+Similarity, jaccard
+Dendrogram, ward.D2
+Criteria, silho
+Dataset_Name, GnegativeGO
+Number_Dataset, 39
+Number_Folds, 10
+Number_Cores, 1
+Number_Chains, 1

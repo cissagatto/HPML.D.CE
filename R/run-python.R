@@ -201,20 +201,20 @@ execute.run.python <- function(parameters){
       cat("\n#######################################################\n\n")
     timeBuild = system.time(resBuild <- build.python.silho(parameters))
     
-    
-    cat("\n\n#######################################################")
-      cat("\n# RUN python SILHOUETTE: Evaluation                   #")
-      cat("\n#######################################################\n\n")
-    timeEvaluate = system.time(resEval <- evaluate.python.silho(parameters, 
-                                                                folder = parameters$Folders$folderTested))
-  
-    
-    cat("\n\n#######################################################")
-      cat("\n# RUN python SILHOUETTE: gather                       #")
-      cat("\n#######################################################\n\n")
-    timeGather = system.time(resGE <- gather.eval.python.silho(parameters,
-                                                               folder = parameters$Folders$folderTested))
-    
+    # 
+    # cat("\n\n#######################################################")
+    #   cat("\n# RUN python SILHOUETTE: Evaluation                   #")
+    #   cat("\n#######################################################\n\n")
+    # timeEvaluate = system.time(resEval <- evaluate.python.silho(parameters, 
+    #                                                             folder = parameters$Folders$folderTested))
+    # 
+    # 
+    # cat("\n\n#######################################################")
+    #   cat("\n# RUN python SILHOUETTE: gather                       #")
+    #   cat("\n#######################################################\n\n")
+    # timeGather = system.time(resGE <- gather.eval.python.silho(parameters,
+    #                                                            folder = parameters$Folders$folderTested))
+    # 
 
     # cat("\n\n#######################################################")
     # cat("\n# RUN python SILHOUETTE: Save Runtime                   #")

@@ -363,7 +363,6 @@ if(parameters$Config$Implementation =="clus"){
   system(paste0("rm -r ", parameters$Folders$folderDatasets))
   system(paste0("rm -r ", parameters$Folders$folderResults, 
                 "/", parameters$DatasetInfo$Name))
-  
   system(paste0("rm -r ", parameters$Folders$folderResults, "/Tested2"))
   
   
